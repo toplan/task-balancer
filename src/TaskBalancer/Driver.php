@@ -14,6 +14,12 @@ class Driver
     protected $name;
 
     /**
+     * task instance
+     * @var
+     */
+    protected $task;
+
+    /**
      * driver run successful
      * @var bool
      */
@@ -45,13 +51,15 @@ class Driver
 
     /**
      * constructor
+     * @param            $task
      * @param            $name
      * @param int        $weight
      * @param \Closure   $worker
      * @param bool|false $isBackUp
      */
-    public function __constructor($name, $weight = 1, $isBackUp = false, \Closure $worker = null)
+    public function __construct(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $worker = null)
     {
+        $this->task = $task;
         $this->name = $name;
         $this->weight = intval($weight);
         $this->isBackUp = boolval($isBackUp);
@@ -60,6 +68,7 @@ class Driver
 
     /**
      * create a driver instance
+     * @param            $task
      * @param            $name
      * @param int        $weight
      * @param \Closure   $worker
@@ -67,9 +76,9 @@ class Driver
      *
      * @return static
      */
-    public static function create($name, $weight = 1, $isBackUp = false, \Closure $worker = null)
+    public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $worker = null)
     {
-        $driver = new static($name, $weight, $isBackUp, $worker);
+        $driver = new static($task, $name, $weight, $isBackUp, $worker);
         return $driver;
     }
 
@@ -134,6 +143,12 @@ class Driver
     public function backUp($is = true)
     {
         $this->isBackUp = (Boolean) $is;
+        if ($is) {
+            $this->task->addToBackupDrivers($this);
+        }
+        if (!$is) {
+            $this->task->removeFromBackupDrivers($this);
+        }
         return $this;
     }
 

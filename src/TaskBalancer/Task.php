@@ -63,7 +63,7 @@ class Task {
      * @param               $name
      * @param \Closure|null $worker
      */
-    public function __constructor($name, \Closure $worker = null)
+    public function __construct($name, \Closure $worker = null)
     {
         $this->name = $name;
         $this->worker = $worker;
@@ -92,26 +92,30 @@ class Task {
         }
     }
 
-    public function run($driverName = '', $data = null)
+    public function run($driverName = '')
     {
+        if ($this->isRunning()) {
+            //stop run because current task is running
+            return false;
+        }
         $this->status = static::RUNNING;
         if (!$driverName) {
             $driverName = $this->getDriverNameByWeight();
         }
         $this->resortBackupDrivers($driverName);
-        $result = $this->runDriver($driverName, $data);
+        $success = $this->runDriver($driverName);
         $this->status = static::FINISHED;
-        return $result;
+        return $success;
     }
 
-    public function runDriver($name, $data = null)
+    public function runDriver($name)
     {
         $driver = $this->getDriver($name);
         if (!$driver) {
             throw new \Exception("not found driver [$name] in task [$this->name], please define it for current task");
         }
         $this->currentDriver = $driver;
-        $result = $driver->data($data)->run();
+        $result = $driver->run();
         $success = $driver->success;
         $data = [
             'driver' => $driver->name,
@@ -128,11 +132,11 @@ class Task {
         return $success;
     }
 
-    public function runBackupDriver($data = null)
+    public function runBackupDriver()
     {
         $name = $this->getNextBackupDriverName();
         if ($name) {
-            return $this->runDriver($name, $data);
+            return $this->runDriver($name);
         }
         return true;
     }
@@ -165,9 +169,11 @@ class Task {
             $count += $driver->weight;
             if ($driver->weight) {
                 $max = $base + $driver->weight;
-                $map['min'] = $base;
-                $map['max'] = $max;
-                $map['driver'] = $driver->name;
+                $map[] = [
+                    'min' => $base,
+                    'max' => $max,
+                    'driver' => $driver->name,
+                ];
                 $base = $max;
             }
         }
@@ -192,13 +198,13 @@ class Task {
     {
         $driver = $this->getDriver($name);
         if (!$driver) {
-            $driver = Driver::create($name, $weight, $isBackup, $worker);
+            $driver = Driver::create($this, $name, $weight, $isBackup, $worker);
             $this->drivers[$name] = $driver;
             if ($isBackup) {
                 $this->backupDrivers[] = $name;
             }
         }
-        return $driver;
+        return $this->drivers[$name];
     }
 
     public function hasDriver($name)
@@ -226,6 +232,57 @@ class Task {
             $key = array_search($name, $this->backupDrivers);
             unset($this->backupDrivers[$key]);
             array_unshift($this->backupDrivers, $name);
+            $this->backupDrivers = array_values($this->backupDrivers);
         }
+    }
+
+    public function isRunning()
+    {
+        return $this->status == static::RUNNING;
+    }
+
+    public function reset()
+    {
+        $this->status = '';
+        return $this;
+    }
+
+    public function addToBackupDrivers($driverName)
+    {
+        if ($driverName instanceof Driver) {
+            $driverName = $driverName->name;
+        }
+        if (!in_array($driverName, $this->backupDrivers)) {
+            array_push($this->backupDrivers, $driverName);
+        }
+    }
+
+    public function removeFromBackupDrivers($driverName)
+    {
+        if ($driverName instanceof Driver) {
+            $driverName = $driverName->name;
+        }
+        if (in_array($driverName, $this->backupDrivers)) {
+            $key = array_search($driverName, $this->backupDrivers);
+            unset($this->backupDrivers[$key]);
+            $this->backupDrivers = array_values($this->backupDrivers);
+        }
+    }
+
+    /**
+     * override
+     * @param $name
+     *
+     * @return null
+     */
+    public function __get($name)
+    {
+        if (isset($this->$name)) {
+            return $this->$name;
+        }
+        if (array_key_exists($name, $this->drivers)) {
+            return $this->drivers[$name];
+        }
+        return null;
     }
 }

@@ -11,24 +11,62 @@ class Balancer {
      * task instances
      * @var array
      */
-    protected $tasks = [];
+    protected static $tasks = [];
 
     /**
      * running task instances
      * @var array
      */
-    protected $runningTasks = [];
+    protected static $runningTasks = [];
 
-    public function task($name, \Closure $fn = null)
+    /**
+     * create a task instance
+     * @param               $name
+     * @param \Closure|null $fn
+     *
+     * @return Task
+     */
+    public static function task($name, \Closure $fn = null)
     {
-        return Task::create($name, $fn);
+        $task = self::getTask($name);
+        if (!$task) {
+            $task = Task::create($name, $fn);
+            self::$tasks[$name] = $task;
+        }
+        return $task;
     }
 
-    public function run($name = '')
+    /**
+     * run a task instance
+     * @param string $name
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function run($name = '')
     {
-        $task = $this->tasks[$name];
-        $result = $task->run();
-        return $result;
+        $task = self::getTask($name);
+        if (!$task) {
+            throw new \Exception("run task $name failed, not find this task");
+        }
+        $task->run();
+        return $task->results;
     }
 
+    /**
+     * get a task instance by name
+     * @param $name
+     *
+     * @return null
+     */
+    public static function getTask($name)
+    {
+        if (!self::$tasks) {
+            return null;
+        }
+        if (isset(self::$tasks[$name])) {
+            return self::$tasks[$name];
+        }
+        return null;
+    }
 }
