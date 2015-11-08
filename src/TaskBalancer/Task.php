@@ -47,10 +47,10 @@ class Task {
     protected $currentDriver = null;
 
     /**
-     * task worker
+     * task work
      * @var null
      */
-    protected $worker = null;
+    protected $work = null;
 
     /**
      * drivers` results
@@ -61,34 +61,34 @@ class Task {
     /**
      * constructor
      * @param               $name
-     * @param \Closure|null $worker
+     * @param \Closure|null $work
      */
-    public function __construct($name, \Closure $worker = null)
+    public function __construct($name, \Closure $work = null)
     {
         $this->name = $name;
-        $this->worker = $worker;
+        $this->work = $work;
     }
 
     /**
      * create a new task
      * @param               $name
-     * @param \Closure|null $worker
+     * @param \Closure|null $work
      * @return Task
      */
-    public static function create($name, \Closure $worker = null)
+    public static function create($name, \Closure $work = null)
     {
-        $task = new static($name, $worker);
-        $task->runWorker();
+        $task = new static($name, $work);
+        $task->runWork();
         return $task;
     }
 
     /**
-     * run worker
+     * run work
      */
-    public function runWorker()
+    public function runWork()
     {
-        if ($this->worker) {
-            call_user_func($this->worker, $this);
+        if ($this->work) {
+            call_user_func($this->work, $this);
         }
     }
 
@@ -194,11 +194,11 @@ class Task {
         return array_rand(array_keys($this->drivers));
     }
 
-    public function driver($name, $weight = 1, $isBackup = false, \Closure $worker = null)
+    public function driver($name, $weight = 1, $isBackup = false, \Closure $work = null)
     {
         $driver = $this->getDriver($name);
         if (!$driver) {
-            $driver = Driver::create($this, $name, $weight, $isBackup, $worker);
+            $driver = Driver::create($this, $name, $weight, $isBackup, $work);
             $this->drivers[$name] = $driver;
             if ($isBackup) {
                 $this->backupDrivers[] = $name;

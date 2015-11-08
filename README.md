@@ -6,34 +6,37 @@ Task balancer for php (like the nginx load balancing)
 ```php
 //define task
 Balancer::task('task1', function($task){
-    //define drive
+    //define driver
     $task->driver('driver1')
          ->weight(3)->backUp()
          ->data(['this is data 1'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->failed();
-                    print_r('run work! by '.$driver->name.'<br>');
-                    return ['test.driver1 working', $data];
+                    $msg = 'working! by '.$driver->name.'<br>';
+                    print_r($msg);
+                    return [$msg, $data];
                 });
 
-    //define drive
+    //define driver
     $task->driver('driver2')
          ->weight(3)->backUp(false)
          ->data(['this is data 2'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->success();
-                    print_r('run work! by '.$driver->name.'<br>');
-                    return ['test.driver2 working', $data];
+                    $msg = 'working! by '.$driver->name.'<br>';
+                    print_r($msg);
+                    return [$msg, $data];
                 });
 
-    //define drive
+    //define driver
     $task->driver('driver3')
          ->weight(0)->backUp()
          ->data(['this is data 3'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->failed();
-                    print_r('run work! by '.$driver->name.'<br>');
-                    return ['test.driver3 working', $data];
+                    $msg = 'working! by '.$driver->name.'<br>';
+                    print_r($msg);
+                    return [$msg, $data];
                 });
 });
 
