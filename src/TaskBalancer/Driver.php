@@ -38,13 +38,13 @@ class Driver
     protected $isBackUp = false;
 
     /**
-     * driver worker
+     * driver`s work
      * @var null
      */
-    protected $worker = null;
+    protected $work = null;
 
     /**
-     * data for run worker
+     * data for run work
      * @var null
      */
     protected $data = null;
@@ -54,16 +54,16 @@ class Driver
      * @param            $task
      * @param            $name
      * @param int        $weight
-     * @param \Closure   $worker
+     * @param \Closure   $work
      * @param bool|false $isBackUp
      */
-    public function __construct(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $worker = null)
+    public function __construct(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
     {
         $this->task = $task;
         $this->name = $name;
         $this->weight = intval($weight);
         $this->isBackUp = boolval($isBackUp);
-        $this->worker = $worker;
+        $this->work = $work;
     }
 
     /**
@@ -71,26 +71,26 @@ class Driver
      * @param            $task
      * @param            $name
      * @param int        $weight
-     * @param \Closure   $worker
+     * @param \Closure   $work
      * @param bool|false $isBackUp
      *
      * @return static
      */
-    public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $worker = null)
+    public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
     {
-        $driver = new static($task, $name, $weight, $isBackUp, $worker);
+        $driver = new static($task, $name, $weight, $isBackUp, $work);
         return $driver;
     }
 
     /**
-     * run driver`s worker
+     * run driver`s work
      * @return mixed|null
      */
     public function run()
     {
         $result = null;
-        if ($this->worker) {
-            $result = call_user_func_array($this->worker, [$this, $this->data]);
+        if ($this->work) {
+            $result = call_user_func_array($this->work, [$this, $this->data]);
         }
         return $result;
     }
@@ -153,13 +153,13 @@ class Driver
     }
 
     /**
-     * @param \Closure $worker
+     * @param \Closure $work
      *
      * @return $this
      */
-    public function worker(\Closure $worker)
+    public function work(\Closure $work)
     {
-        $this->worker = $worker;
+        $this->work = $work;
         return $this;
     }
 

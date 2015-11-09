@@ -10,17 +10,17 @@ use Toplan\TaskBalance\Driver;
 //define task:
 $t = Balancer::task('test1', function($task){
     $task->driver('driver1')
-         ->weight(8)->backUp()
+         ->weight(100)->backUp()
          ->data(['this is data 1'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->failed();
                     print_r('run work! by '.$driver->name.'<br>');
                     return ['test.driver1 working', $data];
                 });
     $task->driver('driver2')
-         ->weight(2)
+         ->weight(80)
          ->data(['this is data 2'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->failed();
                     print_r('run work! by '.$driver->name.'<br>');
                     return ['test.driver2 working', $data];
@@ -28,7 +28,7 @@ $t = Balancer::task('test1', function($task){
     $task->driver('driver3')
          ->weight(0)->backUp()
          ->data(['this is data 3'])
-         ->worker(function($driver, $data){
+         ->work(function($driver, $data){
                     $driver->failed();
                     print_r('run work! by '.$driver->name.'<br>');
                     return ['test.driver3 working', $data];
