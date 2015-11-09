@@ -1,10 +1,10 @@
 # task-balancer
-Task balancer for php (like the nginx load balancing)
+task load balancer for php (like the nginx load balancing)
 
 # Usage
 
 ```php
-//define task
+//define tas
 Balancer::task('task1', function($task){
     //define drive
     $task->driver('driver1')
@@ -40,3 +40,8 @@ Balancer::task('task1', function($task){
 //run task
 $result = Balancer::run('task1');
 ```
+# Todo
+
+- [ ] remember every drivers` start time and end time.
+- [ ] driver`s create arguments in task class (smart parse arguments)
+- [ ] define task`s lifecycle
