@@ -45,7 +45,7 @@ $result = Balancer::run('task1');
 ```
 # Todo
 
-- [ ] remember every tasks` start time and end time.
-- [ ] remember every drivers` start time and end time.
-- [ ] driver`s create arguments in task class (smart parse arguments)
+- [x] remember every tasks` start time and end time.
+- [x] remember every drivers` start time and end time.
+- [ ] smart parse driver`s create arguments in task class
 - [ ] define task`s lifecycle

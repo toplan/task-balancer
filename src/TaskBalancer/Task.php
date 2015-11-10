@@ -53,6 +53,15 @@ class Task {
     protected $work = null;
 
     /**
+     * task run time
+     * @var array
+     */
+    protected $time = [
+        'started_at' => 0,
+        'finished_at' => 0
+    ];
+
+    /**
      * drivers` results
      * @var array
      */
@@ -92,22 +101,61 @@ class Task {
         }
     }
 
+    /**
+     * run task
+     * @param string $driverName
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function run($driverName = '')
     {
         if ($this->isRunning()) {
             //stop run because current task is running
             return false;
         }
-        $this->status = static::RUNNING;
+        if (!$this->beforeRun()) {
+            return false;
+        }
         if (!$driverName) {
             $driverName = $this->getDriverNameByWeight();
         }
         $this->resortBackupDrivers($driverName);
         $success = $this->runDriver($driverName);
-        $this->status = static::FINISHED;
-        return $success;
+        return $this->afterRun($success);
     }
 
+    /**
+     * before run task
+     * @return bool
+     */
+    private function beforeRun()
+    {
+        $this->time['started_at'] = microtime();
+        $this->status = static::RUNNING;
+        return true;
+    }
+
+    /**
+     * after run task
+     * @param $result
+     *
+     * @return mixed
+     */
+    private function afterRun($result)
+    {
+        $this->status = static::FINISHED;
+        $this->time['finished_at'] = microtime();
+        return $result;
+    }
+
+    /**
+     * run driver by name
+     * @param $name
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function runDriver($name)
     {
         $driver = $this->getDriver($name);
@@ -133,6 +181,11 @@ class Task {
         return $success;
     }
 
+    /**
+     * get a backup driver and run it
+     * @return bool
+     * @throws \Exception
+     */
     public function runBackupDriver()
     {
         $name = $this->getNextBackupDriverName();
@@ -142,6 +195,10 @@ class Task {
         return true;
     }
 
+    /**
+     * generator a back up driver`s name
+     * @return null
+     */
     public function getNextBackupDriverName()
     {
         $drivers = $this->backupDrivers;
@@ -162,6 +219,11 @@ class Task {
         return null;
     }
 
+    /**
+     * get a driver`s name by drivers` weight
+     * @return mixed
+     * @throws \Exception
+     */
     public function getDriverNameByWeight()
     {
         $count = $base = 0;
@@ -190,11 +252,24 @@ class Task {
         throw new \Exception('get driver name by weight failed, something wrong');
     }
 
+    /**
+     * get a driver name
+     * @return mixed
+     */
     public function driverNameRand()
     {
         return array_rand(array_keys($this->drivers));
     }
 
+    /**
+     * create a new driver instance for current task
+     * @param               $name
+     * @param int           $weight
+     * @param bool|false    $isBackup
+     * @param \Closure|null $work
+     *
+     * @return mixed
+     */
     public function driver($name, $weight = 1, $isBackup = false, \Closure $work = null)
     {
         $driver = $this->getDriver($name);
@@ -205,9 +280,15 @@ class Task {
                 $this->backupDrivers[] = $name;
             }
         }
-        return $this->drivers[$name];
+        return $driver;
     }
 
+    /**
+     * current task has driver?
+     * @param $name
+     *
+     * @return bool
+     */
     public function hasDriver($name)
     {
         if (!$this->drivers) {
@@ -216,6 +297,12 @@ class Task {
         return isset($this->drivers[$name]);
     }
 
+    /**
+     * get a driver from current task drives pool
+     * @param $name
+     *
+     * @return null
+     */
     public function getDriver($name)
     {
         if ($this->hasDriver($name)) {
@@ -224,6 +311,10 @@ class Task {
         return null;
     }
 
+    /**
+     * init back up drivers
+     * @param $name
+     */
     public function resortBackupDrivers($name)
     {
         if (count($this->backupDrivers) < 2) {
@@ -237,17 +328,29 @@ class Task {
         }
     }
 
+    /**
+     * task is running ?
+     * @return bool
+     */
     public function isRunning()
     {
         return $this->status == static::RUNNING;
     }
 
+    /**
+     * reset status
+     * @return $this
+     */
     public function reset()
     {
         $this->status = '';
         return $this;
     }
 
+    /**
+     * add a driver to backup drivers
+     * @param $driverName
+     */
     public function addToBackupDrivers($driverName)
     {
         if ($driverName instanceof Driver) {
@@ -258,6 +361,10 @@ class Task {
         }
     }
 
+    /**
+     * remove character driver from backup drivers
+     * @param $driverName
+     */
     public function removeFromBackupDrivers($driverName)
     {
         if ($driverName instanceof Driver) {

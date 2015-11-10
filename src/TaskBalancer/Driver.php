@@ -95,7 +95,7 @@ class Driver
      * before run hook
      * @return bool
      */
-    public function beforeRun()
+    private function beforeRun()
     {
         $this->time['started_at'] = microtime();
         return true;
@@ -124,7 +124,7 @@ class Driver
      *
      * @return mixed
      */
-    public function afterRun($result)
+    private function afterRun($result)
     {
         $this->time['finished_at'] = microtime();
         return $result;
