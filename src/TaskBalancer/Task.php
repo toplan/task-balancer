@@ -87,7 +87,7 @@ class Task {
      */
     public function runWork()
     {
-        if ($this->work) {
+        if (is_callable($this->work)) {
             call_user_func($this->work, $this);
         }
     }
@@ -119,6 +119,7 @@ class Task {
         $success = $driver->success;
         $data = [
             'driver' => $driver->name,
+            'time' => $driver->time,
             'success' => $success,
             'result' => $result,
         ];

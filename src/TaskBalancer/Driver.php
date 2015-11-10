@@ -50,6 +50,15 @@ class Driver
     protected $data = null;
 
     /**
+     * run work time
+     * @var array
+     */
+    protected $time = [
+        'started_at' => 0,
+        'finished_at' => 0,
+    ];
+
+    /**
      * constructor
      * @param            $task
      * @param            $name
@@ -83,15 +92,41 @@ class Driver
     }
 
     /**
+     * before run hook
+     * @return bool
+     */
+    public function beforeRun()
+    {
+        $this->time['started_at'] = microtime();
+        return true;
+    }
+
+    /**
      * run driver`s work
      * @return mixed|null
      */
     public function run()
     {
+        $this->beforeRun();
+        if (!$this->beforeRun()) {
+            return null;
+        }
         $result = null;
-        if ($this->work) {
+        if (is_callable($this->work)) {
             $result = call_user_func_array($this->work, [$this, $this->data]);
         }
+        return $this->afterRun($result);
+    }
+
+    /**
+     * after run hook
+     * @param $result
+     *
+     * @return mixed
+     */
+    public function afterRun($result)
+    {
+        $this->time['finished_at'] = microtime();
         return $result;
     }
 

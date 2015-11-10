@@ -18,7 +18,7 @@ $t = Balancer::task('test1', function($task){
                     return ['test.driver1 working', $data];
                 });
     $task->driver('driver2')
-         ->weight(80)
+         ->weight(100)
          ->data(['this is data 2'])
          ->work(function($driver, $data){
                     $driver->failed();
