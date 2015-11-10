@@ -87,7 +87,7 @@ class Driver
      */
     public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
     {
-        $driver = new static($task, $name, $weight, $isBackUp, $work);
+        $driver = new self($task, $name, $weight, $isBackUp, $work);
         return $driver;
     }
 
@@ -113,7 +113,7 @@ class Driver
         }
         $result = null;
         if (is_callable($this->work)) {
-            $result = call_user_func_array($this->work, [$this, $this->data]);
+            $result = call_user_func_array($this->work, [$this, $this->getData()]);
         }
         return $this->afterRun($result);
     }
@@ -198,8 +198,45 @@ class Driver
         return $this;
     }
 
+    /**
+     * get data
+     * @return null
+     */
+    public function getData()
+    {
+        return $this->getDriverData() ?:
+               $this->getTaskData();
+    }
+
+    /**
+     * get driver data
+     * @return null
+     */
+    public function getDriverData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * get task data
+     * @return null
+     */
+    public function getTaskData()
+    {
+        return $this->task->data;
+    }
+
+    /**
+     * override
+     * @param $name
+     *
+     * @return null
+     */
     public function __get($name)
     {
+        if ($name == "data") {
+            return $this->getData();
+        }
         if (isset($this->$name)) {
             return $this->$name;
         }

@@ -62,6 +62,12 @@ class Task {
     ];
 
     /**
+     * data for driver
+     * @var null
+     */
+    protected $data = null;
+
+    /**
      * drivers` results
      * @var array
      */
@@ -70,23 +76,26 @@ class Task {
     /**
      * constructor
      * @param               $name
+     * @param               $data
      * @param \Closure|null $work
      */
-    public function __construct($name, \Closure $work = null)
+    public function __construct($name, $data = null, \Closure $work = null)
     {
         $this->name = $name;
+        $this->data = $data;
         $this->work = $work;
     }
 
     /**
      * create a new task
      * @param               $name
+     * @param               $data
      * @param \Closure|null $work
      * @return Task
      */
-    public static function create($name, \Closure $work = null)
+    public static function create($name, $data = null, \Closure $work = null)
     {
-        $task = new static($name, $work);
+        $task = new self($name, $data, $work);
         $task->runWork();
         return $task;
     }
@@ -131,9 +140,12 @@ class Task {
      */
     private function beforeRun()
     {
+        $pass = true;
         $this->time['started_at'] = microtime();
-        $this->status = static::RUNNING;
-        return true;
+        if ($pass) {
+            $this->status = static::RUNNING;
+        }
+        return $pass;
     }
 
     /**
@@ -375,6 +387,18 @@ class Task {
             unset($this->backupDrivers[$key]);
             $this->backupDrivers = array_values($this->backupDrivers);
         }
+    }
+
+    /**
+     * set data
+     * @param $data
+     *
+     * @return $this
+     */
+    public function data($data)
+    {
+        $this->data = $data;
+        return $this;
     }
 
     /**

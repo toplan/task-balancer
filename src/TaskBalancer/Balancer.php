@@ -21,16 +21,21 @@ class Balancer {
 
     /**
      * create a task instance
-     * @param               $name
-     * @param \Closure|null $fn
+     * @param      $name
+     * @param      $data
+     * @param \Closure|null $callback
      *
-     * @return Task
+     * @return null|Task
      */
-    public static function task($name, \Closure $fn = null)
+    public static function task($name, $data, \Closure $callback = null)
     {
         $task = self::getTask($name);
         if (!$task) {
-            $task = Task::create($name, $fn);
+            if (is_callable($data)) {
+                $callback = $data;
+                $data = null;
+            }
+            $task = Task::create($name, $data, $callback);
             self::$tasks[$name] = $task;
         }
         return $task;
@@ -39,15 +44,19 @@ class Balancer {
     /**
      * run a task instance
      * @param string $name
+     * @param string $data
      *
      * @return mixed
      * @throws \Exception
      */
-    public static function run($name = '')
+    public static function run($name = '', $data = null)
     {
         $task = self::getTask($name);
         if (!$task) {
             throw new \Exception("run task $name failed, not find this task");
+        }
+        if ($data) {
+            $task->data($data);
         }
         $task->run();
         return $task->results;
