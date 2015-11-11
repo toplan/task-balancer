@@ -92,7 +92,7 @@ class Driver
     }
 
     /**
-     * before run hook
+     * before run driver work
      * @return bool
      */
     private function beforeRun()
@@ -107,7 +107,6 @@ class Driver
      */
     public function run()
     {
-        $this->beforeRun();
         if (!$this->beforeRun()) {
             return null;
         }
@@ -119,7 +118,7 @@ class Driver
     }
 
     /**
-     * after run hook
+     * after run driver work
      * @param $result
      *
      * @return mixed

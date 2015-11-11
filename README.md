@@ -48,4 +48,5 @@ $result = Balancer::run('task1');
 - [x] remember every tasks` start time and end time.
 - [x] remember every drivers` start time and end time.
 - [ ] smart parse driver`s create arguments in task class
-- [ ] define task`s lifecycle
+- [ ] define task`s lifecycle and hook
+- [ ] pause and continue task
