@@ -273,17 +273,22 @@ class Task {
         return array_rand(array_keys($this->drivers));
     }
 
+
     /**
      * create a new driver instance for current task
-     * @param               $name
-     * @param int           $weight
-     * @param bool|false    $isBackup
-     * @param \Closure|null $work
-     *
-     * @return mixed
+     * @return null|static
+     * @throws \Exception
      */
-    public function driver($name, $weight = 1, $isBackup = false, \Closure $work = null)
+    public function driver()
     {
+        $args = func_get_args();
+        if (!count($args)) {
+            throw new \Exception('please give task`s method `driver` some args');
+        }
+        extract($this->parseDriverArgs($args));
+        if (!$name) {
+            throw new \Exception('please set driver`s name!');
+        }
         $driver = $this->getDriver($name);
         if (!$driver) {
             $driver = Driver::create($this, $name, $weight, $isBackup, $work);
@@ -296,7 +301,44 @@ class Task {
     }
 
     /**
-     * current task has driver?
+     * parse arguments for method `driver()`
+     * @param $args
+     *
+     * @return array
+     */
+    private function parseDriverArgs($args)
+    {
+        $result = [
+            'name' => '',
+            'work' => null,
+            'weight' => 1,
+            'isBackup' => false,
+        ];
+        foreach ($args as $arg) {
+            //find work
+            if (is_callable($arg)) {
+                $result['work'] = $arg;
+            }
+            //find weight, backup, name
+            if (is_string($arg) || is_numeric($arg)) {
+                $arg = preg_replace('/\s+/', ' ', "$arg");
+                $subArgs = explode(' ', trim($arg));
+                foreach ($subArgs as $subArg) {
+                    if (preg_match('/^[0-9]+$/', $subArg)) {
+                        $result['weight'] = $subArg;
+                    } elseif (preg_match('/(backup)/', strtolower($subArg))) {
+                        $result['isBackup'] = true;
+                    } else {
+                        $result['name'] = $subArg;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * current task has character driver?
      * @param $name
      *
      * @return bool
