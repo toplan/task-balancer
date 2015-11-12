@@ -40,7 +40,7 @@ $result = Balancer::run('task1');
 
 # Method
 
-1. Balancer::task($taskName, [$data, ] $work);
+###1. Balancer::task($taskName, [$data, ] $work);
 
 create a task instance, return task instance.
 
@@ -50,15 +50,17 @@ Balancer::task('taskName', $data, function($task){
 });
 ```
 
-2. Balancer::run($taskName)
+**note:** `$data` will store in task instance.
+
+###2. Balancer::run($taskName)
 
 run the task, return a results array.
 
-3. $task->driver($optionString, [$weight, 'backup', ] $work);
+###3. $task->driver($optionString, [$weight, 'backup', ] $work);
 
 create a driver instance for `$task`, return driver instance.
 
-**note:**$weight must be a integer
+**note:** `$weight` must be a integer
 
 ```php
 $task->driver('driverName 80 backup', function($driver, $data){
@@ -67,45 +69,50 @@ $task->driver('driverName 80 backup', function($driver, $data){
 });
 ```
 
-4. $driver->weight($weight)
+###4. $driver->weight($weight)
 
 set driver`s weight, return current driver,
 supported chain operation.
 
-**note:**$weight must be a integer
+**note:** `$weight` must be a integer
 
-5. $driver->backup($is)
+###5. $driver->backup($is)
 
 set driver is backup, return current driver,
 supported chain operation.
 
-**note:**$is must be true of false
+**note:** `$is` must be true of false
 
-6. $driver->data($data);
+###6. $driver->data($data);
 
 set data for driver`s work use,
 support chain operation.
 
-7. $driver->work(function($driver, $data){});
+**note:** `$data` will store in driver instance.
 
-set driver`s work, give two arguments: $driver and $data,
+###7. $driver->work(function($driver, $data){});
+
+set driver`s work, give two arguments: `$driver` and `$data`,
 support chain operation.
 
-8. $driver->failed()
+**note:** `$data` is try to get from driver instance,
+if null will continue try to get from task instance.
+
+###8. $driver->failed()
 
 set current driver run failed,
 support chain operation.
 
-9. $driver->success()
+###9. $driver->success()
 
 set current driver run successful.
 support chain operation.
 
-10. $driver->getDriverData()
+###10. $driver->getDriverData()
 
 get data from driver.
 
-11. $driver->getTaskData()
+###11. $driver->getTaskData()
 
 get data from task.
 
