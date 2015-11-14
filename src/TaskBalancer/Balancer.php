@@ -59,7 +59,9 @@ class Balancer {
             $task->data($data);
         }
         $task->run();
-        return $task->results;
+        $results = $task->results;
+        $task->reset();
+        return $results;
     }
 
     /**

@@ -92,11 +92,11 @@ support chain operation.
 
 ###7. $driver->work(function($driver, $data){});
 
-set driver`s work, give two arguments: `$driver` and `$data`,
+set driver work, give two arguments: `$driver` and `$data`,
 support chain operation.
 
-**note:** `$data` is try to get from driver instance,
-if null will continue try to get from task instance.
+**note:** `$data` is try to get data from driver instance,
+if null will continue try to get data from task instance.
 
 ###8. $driver->failed()
 

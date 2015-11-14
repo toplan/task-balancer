@@ -183,6 +183,9 @@ class Task {
             'success' => $success,
             'result' => $result,
         ];
+        if (!is_array($this->results) || !$this->results) {
+            $this->results = [];
+        }
         array_push($this->results, $data);
         if (!$success) {
             $result = $this->runBackupDriver();
@@ -398,6 +401,7 @@ class Task {
     public function reset()
     {
         $this->status = '';
+        $this->results = null;
         return $this;
     }
 
