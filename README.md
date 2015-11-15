@@ -1,5 +1,11 @@
-# task-balancer
+# Intro
 task load balancer for php (like the nginx load balancing)
+
+# Install
+
+```php
+    composer require 'toplan/task-balancer:~0.0.1'
+```
 
 # Usage
 
