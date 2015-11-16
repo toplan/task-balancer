@@ -8,6 +8,7 @@ lightweight and powerful task load balancing for php
 - Support multiple drives for every task.
 - Automatically choose a driver to execute task by drivers` weight value.
 - Support multiple backup drivers.
+- task cycle life hooks.
 
 # Install
 
@@ -135,14 +136,14 @@ get data from task instance.
 
 ## Task Cycle Life
 
-| Hook name | handler`s arguments | handler`s return value |
+| Hook name | handler arguments | handler return value |
 | --------- | :----------------: | :-----: |
 | beforeCreateDriver | $task | on effect |
 | afterCreateDriver | $task | on effect |
-| beforeRun | $task | if false will stop run task and return `false` |
+| beforeRun | $task | if `false` will stop run task and return `false` |
 | beforeDriverRun | $task | no effect |
 | afterDriverRun | $task | no effect |
-| afterRun | $task, $results | override task`s result data |
+| afterRun | $task, $results | override run task`s results data |
 
 ###1. $task->hook($hookName, \Closure $handler);
 
