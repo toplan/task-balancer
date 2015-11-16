@@ -1,5 +1,13 @@
 # Intro
-task load balancer for php (like the nginx load balancing)
+lightweight and powerful task load balancing for php
+
+> uh.. like the nginx load balancing :)
+
+# Features
+
+- Support multiple drives for every task.
+- Select one driver to execute task`s work by drivers` weight value.
+- Support multiple backup drivers
 
 # Install
 
@@ -30,7 +38,7 @@ Balancer::task('task1', function($task){
          ->data(['this is data 2']);
 
     //or like this:
-    $task->driver('driver_3 ')
+    $task->driver('driver_3')
          ->weight(0)->backUp()
          ->data(['this is data 3'])
          ->work(function($driver, $data){
@@ -44,7 +52,7 @@ Balancer::task('task1', function($task){
 $result = Balancer::run('task1');
 ```
 
-# Method
+# API
 
 ###1. Balancer::task($taskName, [$data, ] $work);
 
@@ -101,8 +109,8 @@ support chain operation.
 set driver work, give two arguments: `$driver` and `$data`,
 support chain operation.
 
-**note:** `$data` is try to get data from driver instance,
-if null will continue try to get data from task instance.
+**note:** `$data` is try to get from driver instance,
+if null will continue try to get from task instance.
 
 ###8. $driver->failed()
 
@@ -128,4 +136,8 @@ get data from task.
 - [x] remember every drivers` start time and end time.
 - [x] smart parse driver`s create arguments in task class
 - [ ] define task`s lifecycle and hook
-- [ ] pause and continue task
+- [ ] pause/resume task
+
+# License
+
+MIT
