@@ -135,19 +135,28 @@ get data from task instance.
 
 ## Task Cycle Life
 
-```php
-        'beforeCreateDriver',
-        'afterCreateDriver',
-        'ready',
-        'beforeRun',
-        'beforeRunDriver',
-        'afterRunDriver',
-        'afterRun',
-```
+| Hook name | handler`s arguments | handler`s return value |
+| --------- | :----------------: | :-----: |
+| beforeCreateDriver | $task | on effect |
+| afterCreateDriver | $task | on effect |
+| beforeRun | $task | if false will stop run task and return `false` |
+| beforeDriverRun | $task | no effect |
+| afterDriverRun | $task | no effect |
+| afterRun | $task, $results | override task`s result data |
 
-1. $task->hook($hookName, \Closure $handler);
+###1. $task->hook($hookName, \Closure $handler);
 
-2. $task->beforeRun($handler);
+###2. $task->beforeCreateDriver($handler);
+
+###3. $task->afterCreateDriver($handler);
+
+###4. $task->beforeRun($handler);
+
+###5 $task->beforeDriverRun($handler)
+
+###6 $task->afterDriverRun($handler)
+
+###7. $task->afterRun($handler);
 
 
 # Todo

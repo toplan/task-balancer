@@ -23,10 +23,9 @@ class Task {
     protected static $hooks = [
         'beforeCreateDriver',
         'afterCreateDriver',
-        'ready',
         'beforeRun',
-        'beforeRunDriver',
-        'afterRunDriver',
+        'beforeDriverRun',
+        'afterDriverRun',
         'afterRun',
     ];
 
@@ -127,7 +126,6 @@ class Task {
     {
         if (is_callable($this->work)) {
             call_user_func($this->work, $this);
-            $this->callHookHandler('ready');
         }
     }
 
@@ -199,7 +197,7 @@ class Task {
         $this->currentDriver = $driver;
         // before run a driver,
         // but current driver value is already change to this driver.
-        $this->callHookHandler('beforeRunDriver');
+        $this->callHookHandler('beforeDriverRun');
         // run driver
         $result = $driver->run();
         // result data
@@ -213,7 +211,7 @@ class Task {
         // store data
         $this->storeDriverResult($data);
         // after run driver
-        $this->callHookHandler('afterRunDriver');
+        $this->callHookHandler('afterDriverRun');
         // weather to use backup driver
         if (!$success) {
             $backUpDriverName = $this->getNextBackupDriverName();
@@ -342,7 +340,7 @@ class Task {
      *
      * @return array
      */
-    private function parseDriverArgs($args)
+    protected function parseDriverArgs($args)
     {
         $result = [
             'name' => '',
@@ -509,7 +507,7 @@ class Task {
      *
      * @return mixed|null
      */
-    private function callHookHandler($hookName, $data = null)
+    protected function callHookHandler($hookName, $data = null)
     {
         if (array_key_exists($hookName, $this->handlers)) {
             $handler = $this->handlers[$hookName];
