@@ -150,15 +150,15 @@ class Task {
 
     /**
      * after run task
-     * @param $result
+     * @param $success
      *
      * @return mixed
      */
-    private function afterRun($result)
+    private function afterRun($success)
     {
         $this->status = static::FINISHED;
         $this->time['finished_at'] = microtime();
-        return $result;
+        return $this->results;
     }
 
     /**

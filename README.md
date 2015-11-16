@@ -23,28 +23,29 @@ Balancer::task('task1', function($task){
 
     //define a driver for current task like this:
     $task->driver('driver_1 100 backup', function($driver, $data){
-                    $person = new Person($data['name'], $data['age']);
-                    $driver->failed();
-                    print_r('run work! by '.$driver->name.'<br>');
-                    return ['test.driver1 working', $person->toString()];
+                    //do something here
+                    ...
+                    //set whether run success/failed at last
+                    if ($success) {
+                        $driver->success();
+                    } else {
+                        $driver->failed();
+                    }
+                    //return some data you need
+                    return 'some data here';
                 });
 
     //or like this:
     $task->driver('driver_2', 90, function($driver, $data){
-             $driver->failed();
-             print_r('run work! by '.$driver->name.'<br>');
-             return ['test.driver2 working', $data];
-         })
-         ->data(['this is data 2']);
+                //...same as above..
+         })->data(['this is data 2']);
 
     //or like this:
     $task->driver('driver_3')
          ->weight(0)->backUp()
          ->data(['this is data 3'])
          ->work(function($driver, $data){
-                    $driver->failed();
-                    print_r('run work! by '.$driver->name.'<br>');
-                    return ['test.driver3 working', $data];
+                    //...same as above..
                 });
 });
 

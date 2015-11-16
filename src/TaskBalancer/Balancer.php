@@ -58,8 +58,7 @@ class Balancer {
         if ($data) {
             $task->data($data);
         }
-        $task->run();
-        $results = $task->results;
+        $results = $task->run();
         $task->reset();
         return $results;
     }
