@@ -169,6 +169,10 @@ get data from task instance.
 - [x] define task`s lifecycle and hook
 - [ ] pause/resume task
 
+# Dependents
+
+- [phpsms](https://github.com/toplan/phpsms)
+
 # License
 
 MIT
