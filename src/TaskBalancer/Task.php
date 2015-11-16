@@ -17,6 +17,20 @@ class Task {
     const FINISHED = 'finished';
 
     /**
+     * task instance cycle life hooks
+     * @var array
+     */
+    protected static $hooks = [
+        'beforeCreateDriver',
+        'afterCreateDriver',
+        'ready',
+        'beforeRun',
+        'beforeRunDriver',
+        'afterRunDriver',
+        'afterRun',
+    ];
+
+    /**
      * task name
      * @var
      */
@@ -74,6 +88,12 @@ class Task {
     protected $results = [];
 
     /**
+     * handlers for hooks
+     * @var array
+     */
+    protected $handlers = [];
+
+    /**
      * constructor
      * @param               $name
      * @param               $data
@@ -107,6 +127,7 @@ class Task {
     {
         if (is_callable($this->work)) {
             call_user_func($this->work, $this);
+            $this->callHookHandler('ready');
         }
     }
 
@@ -140,10 +161,10 @@ class Task {
      */
     private function beforeRun()
     {
-        $pass = true;
-        $this->time['started_at'] = microtime();
+        $pass = $this->callHookHandler('beforeRun');
         if ($pass) {
             $this->status = static::RUNNING;
+            $this->time['started_at'] = microtime();
         }
         return $pass;
     }
@@ -158,7 +179,8 @@ class Task {
     {
         $this->status = static::FINISHED;
         $this->time['finished_at'] = microtime();
-        return $this->results;
+        $data = $this->callHookHandler('afterRun', $this->results);
+        return is_bool($data) ? $this->results : $data;
     }
 
     /**
@@ -175,7 +197,12 @@ class Task {
             throw new \Exception("not found driver [$name] in task [$this->name], please define it for current task");
         }
         $this->currentDriver = $driver;
+        // before run a driver,
+        // but current driver value is already change to this driver.
+        $this->callHookHandler('beforeRunDriver');
+        // run driver
         $result = $driver->run();
+        // result data
         $success = $driver->success;
         $data = [
             'driver' => $driver->name,
@@ -183,31 +210,35 @@ class Task {
             'success' => $success,
             'result' => $result,
         ];
-        if (!is_array($this->results) || !$this->results) {
-            $this->results = [];
-        }
-        array_push($this->results, $data);
+        // store data
+        $this->storeDriverResult($data);
+        // after run driver
+        $this->callHookHandler('afterRunDriver');
+        // weather to use backup driver
         if (!$success) {
-            $result = $this->runBackupDriver();
-            if ($result) {
-                return true;
+            $backUpDriverName = $this->getNextBackupDriverName();
+            if ($backUpDriverName) {
+               // try to run a backup driver
+               return $this->runDriver($backUpDriverName);
             }
+            // not find a backup driver, current driver must be run false.
+            return false;
         }
-        return $success;
+        return true;
     }
 
     /**
-     * get a backup driver and run it
-     * @return bool
-     * @throws \Exception
+     * store driver run result data
+     * @param $data
      */
-    public function runBackupDriver()
+    public function storeDriverResult($data)
     {
-        $name = $this->getNextBackupDriverName();
-        if ($name) {
-            return $this->runDriver($name);
+        if (!is_array($this->results) || !$this->results) {
+            $this->results = [];
         }
-        return true;
+        if ($data) {
+            array_push($this->results, $data);
+        }
     }
 
     /**
@@ -294,11 +325,13 @@ class Task {
         }
         $driver = $this->getDriver($name);
         if (!$driver) {
+            $this->callHookHandler('beforeCreateDriver');
             $driver = Driver::create($this, $name, $weight, $isBackup, $work);
             $this->drivers[$name] = $driver;
             if ($isBackup) {
                 $this->backupDrivers[] = $name;
             }
+            $this->callHookHandler('afterCreateDriver');
         }
         return $driver;
     }
@@ -448,7 +481,49 @@ class Task {
     }
 
     /**
-     * override
+     * set hook handler
+     * @param      $hookName
+     * @param null $handler
+     *
+     * @throws \Exception
+     */
+    public function hook($hookName, $handler = null)
+    {
+        if ($handler && is_callable($handler) && is_string($hookName)) {
+            if (in_array($hookName, self::$hooks)) {
+                $this->handlers[$hookName] = $handler;
+            } else {
+                throw new \Exception("Do not support hook [$hookName]");
+            }
+        } elseif (is_array($hookName)) {
+            foreach ($hookName as $k => $h) {
+                $this->hook($k, $h);
+            }
+        }
+    }
+
+    /**
+     * call hook handler
+     * @param $hookName
+     * @param $data
+     *
+     * @return mixed|null
+     */
+    private function callHookHandler($hookName, $data = null)
+    {
+        if (array_key_exists($hookName, $this->handlers)) {
+            $handler = $this->handlers[$hookName];
+            $result = call_user_func_array($handler, [$this, $data]);
+            if ($result === null) {
+                return true;
+            }
+            return $result;
+        }
+        return true;
+    }
+
+    /**
+     * properties overload
      * @param $name
      *
      * @return null
@@ -462,5 +537,25 @@ class Task {
             return $this->drivers[$name];
         }
         return null;
+    }
+
+    /**
+     * method overload
+     * @param $name
+     * @param $args
+     *
+     * @throws \Exception
+     */
+    public function __call($name, $args)
+    {
+        if (in_array($name, self::$hooks)) {
+            if (isset($args[0]) && is_callable($args[0])) {
+                $this->hook($name, $args[0]);
+            } else {
+                throw new \Exception("Please give method [$name()] a callable argument");
+            }
+        } else {
+            throw new \Exception("Not find method [$name]");
+        }
     }
 }

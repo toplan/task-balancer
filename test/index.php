@@ -33,6 +33,15 @@ $t = Balancer::task('test1', $data, function($task){
                     print_r('run work! by '.$driver->name.'<br>');
                     return ['test.driver3 working', $data];
                 });
+
+    $task->beforeRun(function($task){
+        print_r('before run --------!<br>');
+    });
+
+    $task->afterRun(function($task, $results){
+        print_r('after run --------!<br>');
+        return $results;
+    });
 });
 
 //run task:

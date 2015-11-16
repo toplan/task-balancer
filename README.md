@@ -55,6 +55,8 @@ $result = Balancer::run('task1');
 
 # API
 
+## Create & Run
+
 ###1. Balancer::task($taskName, [$data, ] $work);
 
 create a task instance, return task instance.
@@ -131,12 +133,29 @@ get data from driver instance.
 
 get data from task instance.
 
+## Task Cycle Life
+
+```php
+        'beforeCreateDriver',
+        'afterCreateDriver',
+        'ready',
+        'beforeRun',
+        'beforeRunDriver',
+        'afterRunDriver',
+        'afterRun',
+```
+
+1. $task->hook($hookName, \Closure $handler);
+
+2. $task->beforeRun($handler);
+
+
 # Todo
 
 - [x] remember every tasks` start time and end time.
 - [x] remember every drivers` start time and end time.
 - [x] smart parse driver`s create arguments in task class
-- [ ] define task`s lifecycle and hook
+- [x] define task`s lifecycle and hook
 - [ ] pause/resume task
 
 # License
