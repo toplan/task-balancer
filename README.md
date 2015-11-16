@@ -1,7 +1,7 @@
 # Intro
 lightweight and powerful task load balancing for php
 
-> uh.. like the nginx load balancing :)
+> like the nginx load balancing :)
 
 # Features
 
@@ -58,7 +58,7 @@ $result = Balancer::run('task1');
 
 ## Create & Run
 
-###1. Balancer::task($taskName, [$data, ] $work);
+###1. Balancer::task($name [, $data], $work);
 
 create a task instance, return task instance.
 
@@ -70,9 +70,10 @@ Balancer::task('taskName', $data, function($task){
 
 **note:** `$data` will store in task instance.
 
-###2. Balancer::run($taskName)
+###2. Balancer::run($taskName [, $data])
 
-run the task, return a results array.
+run the task, and return a results array.
+**note:** `$data` will override data which in task instance.
 
 ###3. $task->driver($optionString, [$weight, 'backup', ] $work);
 
@@ -145,7 +146,7 @@ get data from task instance.
 | afterDriverRun | $task | no effect |
 | afterRun | $task, $results | override run task`s results data |
 
-###1. $task->hook($hookName, \Closure $handler);
+###1. $task->hook($hookName, $handler);
 
 ###2. $task->beforeCreateDriver($handler);
 
