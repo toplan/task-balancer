@@ -6,8 +6,8 @@ lightweight and powerful task load balancing for php
 # Features
 
 - Support multiple drives for every task.
-- Select one driver to execute task`s work by drivers` weight value.
-- Support multiple backup drivers
+- Automatically choose a driver to execute task by drivers` weight value.
+- Support multiple backup drivers.
 
 # Install
 
@@ -74,7 +74,7 @@ run the task, return a results array.
 
 create a driver instance for `$task`, return driver instance.
 
-**note:** `$weight` must be a integer
+**note:** `$weight` must be a integer, default value is '1'
 
 ```php
 $task->driver('driverName 80 backup', function($driver, $data){
@@ -124,11 +124,11 @@ support chain operation.
 
 ###10. $driver->getDriverData()
 
-get data from driver.
+get data from driver instance.
 
 ###11. $driver->getTaskData()
 
-get data from task.
+get data from task instance.
 
 # Todo
 
