@@ -8,7 +8,7 @@ lightweight and powerful task load balancing for php
 - Support multiple drives for every task.
 - Automatically choose a driver to execute task by drivers` weight value.
 - Support multiple backup drivers.
-- task cycle life hooks.
+- task lifecycle and hooks.
 
 # Install
 
@@ -64,7 +64,7 @@ create a task instance, return task instance.
 
 ```php
 Balancer::task('taskName', $data, function($task){
-    //task`s work
+    //task`s ready work, like create drivers
 });
 ```
 
@@ -75,7 +75,7 @@ Balancer::task('taskName', $data, function($task){
 run the task, and return a results array.
 **note:** `$data` will override data which in task instance.
 
-###3. $task->driver($optionString, [$weight, 'backup', ] $work);
+###3. $task->driver($optionString [, $weight] [, 'backup'], $work);
 
 create a driver instance for `$task`, return driver instance.
 
@@ -135,7 +135,7 @@ get data from driver instance.
 
 get data from task instance.
 
-## Task Cycle Life
+## Task Lifecycle
 
 | Hook name | handler arguments | handler return value |
 | --------- | :----------------: | :-----: |
@@ -163,10 +163,10 @@ get data from task instance.
 
 # Todo
 
-- [x] remember every tasks` start time and end time.
-- [x] remember every drivers` start time and end time.
-- [x] smart parse driver`s create arguments in task class
-- [x] define task`s lifecycle and hook
+- [x] remember every task`s start time and end time.
+- [x] remember every driver`s start time and end time.
+- [x] smart parse arguments of method `driver()`.
+- [x] task lifecycle and hooks
 - [ ] pause/resume task
 
 # Dependents
