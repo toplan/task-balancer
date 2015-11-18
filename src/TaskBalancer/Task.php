@@ -521,6 +521,28 @@ class Task {
     }
 
     /**
+     * set task data
+     * @param $data
+     *
+     * @return $this
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    /**
+     * get task data
+     * equal: $task->data
+     * @return null
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
      * properties overload
      * @param $name
      *

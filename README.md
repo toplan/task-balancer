@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.1.0'
+    composer require 'toplan/task-balancer:~0.1.1'
 ```
 
 # Usage
@@ -134,6 +134,10 @@ get data from driver instance.
 ###11. $driver->getTaskData()
 
 get data from task instance.
+
+###12. $task->setData()
+
+set data to task instance, and override old data!
 
 ## Task Lifecycle
 
