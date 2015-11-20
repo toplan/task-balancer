@@ -64,7 +64,7 @@ create a task instance, return task instance.
 
 ```php
 Balancer::task('taskName', $data, function($task){
-    //task`s work
+    //task init work
 });
 ```
 

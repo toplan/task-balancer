@@ -14,12 +14,6 @@ class Balancer {
     protected static $tasks = [];
 
     /**
-     * running task instances
-     * @var array
-     */
-    protected static $runningTasks = [];
-
-    /**
      * create a task instance
      * @param      $name
      * @param      $data

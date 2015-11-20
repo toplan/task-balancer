@@ -157,7 +157,7 @@ class Task {
      * before run task
      * @return bool
      */
-    private function beforeRun()
+    protected function beforeRun()
     {
         $pass = $this->callHookHandler('beforeRun');
         if ($pass) {
@@ -173,7 +173,7 @@ class Task {
      *
      * @return mixed
      */
-    private function afterRun($success)
+    protected function afterRun($success)
     {
         $this->status = static::FINISHED;
         $this->time['finished_at'] = microtime();
