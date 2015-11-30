@@ -186,13 +186,13 @@ class Task {
      * @param $name
      *
      * @return bool
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
     public function runDriver($name)
     {
         $driver = $this->getDriver($name);
         if (!$driver) {
-            throw new \Exception("not found driver [$name] in task [$this->name], please define it for current task");
+            throw new TaskBalancerException("Don`t found driver [$name] in task [$this->name], please define it for current task");
         }
         $this->currentDriver = $driver;
         // before run a driver,
@@ -253,7 +253,7 @@ class Task {
         if (!in_array($currentDriverName, $drivers)) {
             return $drivers[0];
         }
-        if (count($drivers) == 1 && array_pop($drivers) == $currentDriverName) {
+        if (in_array($currentDriverName, $drivers) && count($drivers) == 1) {
             return null;
         }
         $currentKey = array_search($currentDriverName, $drivers);
@@ -266,7 +266,7 @@ class Task {
     /**
      * get a driver`s name by drivers` weight
      * @return mixed
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
     public function getDriverNameByWeight()
     {
@@ -293,7 +293,7 @@ class Task {
                 return $data['driver'];
             }
         }
-        throw new \Exception('get driver name by weight failed, something wrong');
+        throw new TaskBalancerException('Get driver name by weight failed, something wrong');
     }
 
     /**
@@ -309,17 +309,17 @@ class Task {
     /**
      * create a new driver instance for current task
      * @return null|static
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
     public function driver()
     {
         $args = func_get_args();
         if (!count($args)) {
-            throw new \Exception('please give task`s method `driver` some args');
+            throw new TaskBalancerException('Please give task`s method `driver` some args');
         }
         extract($this->parseDriverArgs($args));
         if (!$name) {
-            throw new \Exception('please set driver`s name!');
+            throw new TaskBalancerException('Please give the new driver a unique name!');
         }
         $driver = $this->getDriver($name);
         if (!$driver) {
@@ -483,7 +483,7 @@ class Task {
      * @param      $hookName
      * @param null $handler
      *
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
     public function hook($hookName, $handler = null)
     {
@@ -491,7 +491,7 @@ class Task {
             if (in_array($hookName, self::$hooks)) {
                 $this->handlers[$hookName] = $handler;
             } else {
-                throw new \Exception("Do not support hook [$hookName]");
+                throw new TaskBalancerException("Don`t support the hook [$hookName]");
             }
         } elseif (is_array($hookName)) {
             foreach ($hookName as $k => $h) {
@@ -542,7 +542,7 @@ class Task {
      * @param $name
      * @param $args
      *
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
     public function __call($name, $args)
     {
@@ -550,10 +550,10 @@ class Task {
             if (isset($args[0]) && is_callable($args[0])) {
                 $this->hook($name, $args[0]);
             } else {
-                throw new \Exception("Please give method [$name()] a callable argument");
+                throw new TaskBalancerException("Please give the method [$name()] a callable argument");
             }
         } else {
-            throw new \Exception("Not find method [$name]");
+            throw new TaskBalancerException("Don`t find the method [$name()]");
         }
     }
 }

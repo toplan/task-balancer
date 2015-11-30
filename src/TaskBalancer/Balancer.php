@@ -39,22 +39,40 @@ class Balancer {
      * run a task instance
      * @param string $name
      * @param string $data
+     * @param string $agentName
      *
      * @return mixed
-     * @throws \Exception
+     * @throws TaskBalancerException
      */
-    public static function run($name = '', $data = null)
+    public static function run($name = '', $data = null, $agentName = '')
     {
         $task = self::getTask($name);
         if (!$task) {
-            throw new \Exception("run task $name failed, not find this task");
+            throw new TaskBalancerException("run task $name failed, not find this task");
         }
         if ($data) {
             $task->data($data);
         }
-        $results = $task->run();
+        $results = $task->run((String) $agentName);
         $task->reset();
         return $results;
+    }
+
+    /**
+     * whether has task
+     * @param $name
+     *
+     * @return bool
+     */
+    public static function hasTask($name)
+    {
+        if (!self::$tasks) {
+            return false;
+        }
+        if (isset(self::$tasks[$name])) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -65,10 +83,7 @@ class Balancer {
      */
     public static function getTask($name)
     {
-        if (!self::$tasks) {
-            return null;
-        }
-        if (isset(self::$tasks[$name])) {
+        if (self::hasTask($name)) {
             return self::$tasks[$name];
         }
         return null;

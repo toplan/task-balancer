@@ -1,7 +1,5 @@
 <?php
-require_once('../src/TaskBalancer/Balancer.php');
-require_once('../src/TaskBalancer/Task.php');
-require_once('../src/TaskBalancer/Driver.php');
+require('../vendor/autoload.php');
 
 use Toplan\TaskBalance\Balancer;
 
@@ -25,7 +23,7 @@ $t = Balancer::task('test1', $data, function($task){
          })
          ->data(['this is data 2']);
 
-    $task->driver('driver_3 ')
+    $task->driver('driver_3')
          ->weight(0)->backUp()
          ->data(['this is data 3'])
          ->work(function($driver, $data){

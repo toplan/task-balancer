@@ -8,12 +8,12 @@ lightweight and powerful task load balancing for php
 - Support multiple drives for every task.
 - Automatically choose a driver to execute task by drivers` weight value.
 - Support multiple backup drivers.
-- task lifecycle and hooks.
+- Task lifecycle and hooks.
 
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.1.2'
+    composer require 'toplan/task-balancer:~0.1.3'
 ```
 
 # Usage
@@ -56,7 +56,7 @@ $result = Balancer::run('task1');
 
 # API
 
-## Create & Run
+## 1. Create & Run
 
 ### Balancer::task($name [, $data], $work);
 
@@ -70,10 +70,10 @@ Balancer::task('taskName', $data, function($task){
 
 > `$data` will store in task instance.
 
-### Balancer::run($taskName [, $data])
+### Balancer::run($taskName [, $data] [, $agentName])
 
 run the task, and return a results array.
-> `$data` will override data which in task instance.
+> If `$data` not equals to `null/0/''/[]` will override task data.
 
 ### $task->data($data)
 
@@ -142,7 +142,7 @@ get data value of driver instance.
 get data value of task instance.
 
 
-## Task Lifecycle
+## 2. Task Lifecycle
 
 | Hook name | handler arguments | handler return value |
 | --------- | :----------------: | :-----: |
@@ -153,19 +153,19 @@ get data value of task instance.
 | afterDriverRun | $task | no effect |
 | afterRun | $task, $results | override run task`s results data |
 
-### $task->hook($hookName, $handler);
+### $task->hook($hookName, $handler)
 
-### $task->beforeCreateDriver($handler);
+### $task->beforeCreateDriver($handler)
 
-### $task->afterCreateDriver($handler);
+### $task->afterCreateDriver($handler)
 
-### $task->beforeRun($handler);
+### $task->beforeRun($handler)
 
 ### $task->beforeDriverRun($handler)
 
 ### $task->afterDriverRun($handler)
 
-### $task->afterRun($handler);
+### $task->afterRun($handler)
 
 
 # Todo
