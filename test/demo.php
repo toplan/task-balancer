@@ -1,5 +1,9 @@
 <?php
-require('../vendor/autoload.php');
+//require('../vendor/autoload.php');
+require('../src/TaskBalancer/Balancer.php');
+require('../src/TaskBalancer/Driver.php');
+require('../src/TaskBalancer/Task.php');
+require('../src/TaskBalancer/TaskBalancerException.php');
 
 use Toplan\TaskBalance\Balancer;
 
@@ -9,7 +13,7 @@ $data = [
     'age'  => '20'
 ];
 $t = Balancer::task('test1', $data, function($task){
-    $task->driver('driver_1 100 backup', function($driver, $data){
+    $task->driver('driver_1 100', 'backup', function($driver, $data){
                     $person = new Person($data['name'], $data['age']);
                     $driver->failed();
                     print_r('run work! by '.$driver->name.'<br>');
@@ -27,7 +31,7 @@ $t = Balancer::task('test1', $data, function($task){
          ->weight(0)->backUp()
          ->data(['this is data 3'])
          ->work(function($driver, $data){
-                    $driver->failed();
+                    $driver->success();
                     print_r('run work! by '.$driver->name.'<br>');
                     return ['test.driver3 working', $data];
                 });
@@ -38,7 +42,6 @@ $t = Balancer::task('test1', $data, function($task){
 
     $task->afterRun(function($task, $results){
         print_r('after run --------!<br>');
-        return $results;
     });
 });
 
