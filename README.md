@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.1.4'
+    composer require 'toplan/task-balancer:~0.1.5'
 ```
 
 # Usage
@@ -52,6 +52,23 @@ Balancer::task('task1', function($task){
 
 //run the task
 $result = Balancer::run('task1');
+```
+
+The `$result` structure:
+```php
+[
+    'success' => true,
+    'time' => [
+        'started_at' => '',
+        'finished_at' => ''
+    ],
+    'logs' => [
+        'driver_1' => [
+            ...
+        ],
+        ...
+    ]
+]
 ```
 
 # API
