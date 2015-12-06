@@ -177,11 +177,11 @@ class Task {
     {
         $this->status = static::FINISHED;
         $this->time['finished_at'] = microtime();
-        $data = $this->callHookHandler('afterRun', $this->results);
         $return = [];
         $return['success'] = $success;
         $return['time'] = $this->time;
         $return['logs'] = $this->results;
+        $data = $this->callHookHandler('afterRun', $return);
         return is_bool($data) ? $return : $data;
     }
 
