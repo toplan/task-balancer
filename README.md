@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.1.5'
+    composer require 'toplan/task-balancer:~0.2.0'
 ```
 
 # Usage
@@ -63,7 +63,8 @@ The `$result` structure:
         'finished_at' => ''
     ],
     'logs' => [
-        'driver_1' => [
+        '0' => [
+            'driver' => 'Luosimao',
             ...
         ],
         ...
@@ -163,27 +164,48 @@ get data value of task instance.
 
 | Hook name | handler arguments | handler return value |
 | --------- | :----------------: | :-----: |
-| beforeCreateDriver | $task | no effect |
-| afterCreateDriver | $task | no effect |
-| beforeRun | $task | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task | no effect |
-| afterDriverRun | $task | no effect |
-| afterRun | $task, $results | override run task`s results data |
+| beforeCreateDriver | $task, $preReturn, $index | no effect |
+| afterCreateDriver | $task, $preReturn, $index | no effect |
+| beforeRun | $task, $preReturn, $index | if `false` will stop run task and return `false` |
+| beforeDriverRun | $task, $preReturn, $index | no effect |
+| afterDriverRun | $task, $preReturn, $index | no effect |
+| afterRun | $task, $results, $preReturn, $index | if not boolean will override result value |
 
-### $task->hook($hookName, $handler)
+### $task->hook($hookName, $handler, $override)
 
-### $task->beforeCreateDriver($handler)
+### $task->beforeCreateDriver($handler, $override)
 
-### $task->afterCreateDriver($handler)
+### $task->afterCreateDriver($handler, $override)
 
-### $task->beforeRun($handler)
+### $task->beforeRun($handler, $override)
 
-### $task->beforeDriverRun($handler)
+### $task->beforeDriverRun($handler, $override)
 
-### $task->afterDriverRun($handler)
+### $task->afterDriverRun($handler, $override)
 
-### $task->afterRun($handler)
+### $task->afterRun($handler, $override)
 
+> `$override` default value is `false`, if `true` will override hooks handler.
+
+```php
+//example
+$task->beforeRun(function($task, $preReturn, $index ){
+    //what is $preReturn?
+    echo $preReturn == null; //true
+    //what is $index?
+    echo $index == 0; //true
+    //do something..
+    return 'beforeRun_1';
+}, false);
+
+$task->beforeRun(function($task, $preReturn, $index ){
+    //what is $preReturn?
+    echo $preReturn == 'beforeRun_1'; //true
+    //what is $index?
+    echo $index == 1; //true
+    //do other something..
+}, false);
+```
 
 # Todo
 

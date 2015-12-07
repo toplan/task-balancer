@@ -486,20 +486,28 @@ class Task {
      * set hook handler
      * @param      $hookName
      * @param null $handler
+     * @param boolean $override
      *
      * @throws TaskBalancerException
      */
-    public function hook($hookName, $handler = null)
+    public function hook($hookName, $handler = null, $override = false)
     {
         if ($handler && is_callable($handler) && is_string($hookName)) {
             if (in_array($hookName, self::$hooks)) {
-                $this->handlers[$hookName] = $handler;
+                if (!isset($this->handlers[$hookName])) {
+                    $this->handlers[$hookName] = [];
+                }
+                if ($override) {
+                    $this->handlers[$hookName] = [$handler];
+                } else {
+                    array_push($this->handlers[$hookName], $handler);
+                }
             } else {
                 throw new TaskBalancerException("Don`t support the hook [$hookName]");
             }
         } elseif (is_array($hookName)) {
             foreach ($hookName as $k => $h) {
-                $this->hook($k, $h);
+                $this->hook($k, $h, false);
             }
         }
     }
@@ -514,8 +522,14 @@ class Task {
     protected function callHookHandler($hookName, $data = null)
     {
         if (array_key_exists($hookName, $this->handlers)) {
-            $handler = $this->handlers[$hookName];
-            $result = call_user_func_array($handler, [$this, $data]);
+            $handlers = $this->handlers[$hookName] ?: [];
+            $result = null;
+            foreach ($handlers as $key => $handler) {
+                $handlerArgs = $data == null ?
+                               [$this, $result, $key]:
+                               [$this, $data, $result, $key];
+                $result = call_user_func_array($handler, $handlerArgs);
+            }
             if ($result === null) {
                 return true;
             }
@@ -552,7 +566,8 @@ class Task {
     {
         if (in_array($name, self::$hooks)) {
             if (isset($args[0]) && is_callable($args[0])) {
-                $this->hook($name, $args[0]);
+                $override = isset($args[1]) ? !!$args[1] : false;
+                $this->hook($name, $args[0], $override);
             } else {
                 throw new TaskBalancerException("Please give the method [$name()] a callable argument");
             }
