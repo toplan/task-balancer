@@ -162,7 +162,11 @@ get data value of task instance.
 
 ## 2. Task Lifecycle
 
-| Hook name | handler arguments | handler return value |
+> support multiple handlers for every hook!
+
+###Hooks Table
+
+| Hook name | handler arguments | influence of the last handler`s return value |
 | --------- | :----------------: | :-----: |
 | beforeCreateDriver | $task, $preReturn, $index | no effect |
 | afterCreateDriver | $task, $preReturn, $index | no effect |
@@ -171,21 +175,24 @@ get data value of task instance.
 | afterDriverRun | $task, $preReturn, $index | no effect |
 | afterRun | $task, $results, $preReturn, $index | if not boolean will override result value |
 
-### $task->hook($hookName, $handler, $override)
+###Use Hooks
 
-### $task->beforeCreateDriver($handler, $override)
+> `$override` default value is `false`, if `true` will override hook handlers.
 
-### $task->afterCreateDriver($handler, $override)
+* $task->hook($hookName, $handler, $override)
 
-### $task->beforeRun($handler, $override)
+* $task->beforeCreateDriver($handler, $override)
 
-### $task->beforeDriverRun($handler, $override)
+* $task->afterCreateDriver($handler, $override)
 
-### $task->afterDriverRun($handler, $override)
+* $task->beforeRun($handler, $override)
 
-### $task->afterRun($handler, $override)
+* $task->beforeDriverRun($handler, $override)
 
-> `$override` default value is `false`, if `true` will override hooks handler.
+* $task->afterDriverRun($handler, $override)
+
+* $task->afterRun($handler, $override)
+
 
 ```php
 //example
