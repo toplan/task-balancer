@@ -8,12 +8,12 @@ lightweight and powerful task load balancing for php
 - Support multiple drives for every task.
 - Automatically choose a driver to execute task by drivers` weight value.
 - Support multiple backup drivers.
-- Task lifecycle and hooks.
+- Task lifecycle and hooks system.
 
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.2.0'
+    composer require 'toplan/task-balancer:~0.2.1'
 ```
 
 # Usage
@@ -59,13 +59,18 @@ The `$result` structure:
 [
     'success' => true,
     'time' => [
-        'started_at' => '',
-        'finished_at' => ''
+        'started_at' => timestamp,
+        'finished_at' => timestamp
     ],
     'logs' => [
         '0' => [
-            'driver' => 'Luosimao',
-            ...
+            'driver' => 'driver_1',
+            'success' => false,
+            'time' => [
+                'started_at' => timestamp,
+                'finished_at' => timestamp
+            ],
+            'result' => 'some data here'
         ],
         ...
     ]
@@ -168,12 +173,12 @@ get data value of task instance.
 
 | Hook name | handler arguments | influence of the last handler`s return value |
 | --------- | :----------------: | :-----: |
-| beforeCreateDriver | $task, $preReturn, $index | no effect |
-| afterCreateDriver | $task, $preReturn, $index | no effect |
-| beforeRun | $task, $preReturn, $index | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task, $preReturn, $index | no effect |
-| afterDriverRun | $task, $preReturn, $index | no effect |
-| afterRun | $task, $results, $preReturn, $index | if not boolean will override result value |
+| beforeCreateDriver | $task, $preReturn, $index, $count | no effect |
+| afterCreateDriver | $task, $preReturn, $index, $count | no effect |
+| beforeRun | $task, $preReturn, $index, $count | if `false` will stop run task and return `false` |
+| beforeDriverRun | $task, $preReturn, $index, $count | no effect |
+| afterDriverRun | $task, $preReturn, $index, $count | no effect |
+| afterRun | $task, $taskResult, $preReturn, $index, $count | if not boolean will override result value |
 
 ###Use Hooks
 
@@ -196,20 +201,24 @@ get data value of task instance.
 
 ```php
 //example
-$task->beforeRun(function($task, $preReturn, $index ){
+$task->beforeRun(function($task, $preReturn, $index, $count){
     //what is $preReturn?
-    echo $preReturn == null; //true
+    $preReturn == null; //true
     //what is $index?
-    echo $index == 0; //true
+    $index == 0; //true
+    //what is $count?
+    echo $count; //2
     //do something..
     return 'beforeRun_1';
 }, false);
 
-$task->beforeRun(function($task, $preReturn, $index ){
+$task->beforeRun(function($task, $preReturn, $index, $count){
     //what is $preReturn?
-    echo $preReturn == 'beforeRun_1'; //true
+    $preReturn == 'beforeRun_1'; //true
     //what is $index?
-    echo $index == 1; //true
+    $index == 1; //true
+    //what is $count?
+    echo $count; //2
     //do other something..
 }, false);
 ```
