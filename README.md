@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.2.1'
+    composer require 'toplan/task-balancer:~0.2.2'
 ```
 
 # Usage
@@ -173,12 +173,12 @@ get data value of task instance.
 
 | Hook name | handler arguments | influence of the last handler`s return value |
 | --------- | :----------------: | :-----: |
-| beforeCreateDriver | $task, $preReturn, $index, $count | no effect |
-| afterCreateDriver | $task, $preReturn, $index, $count | no effect |
-| beforeRun | $task, $preReturn, $index, $count | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task, $preReturn, $index, $count | no effect |
-| afterDriverRun | $task, $preReturn, $index, $count | no effect |
-| afterRun | $task, $taskResult, $preReturn, $index, $count | if not boolean will override result value |
+| beforeCreateDriver | $task, $preReturn, $index, $handlers | no effect |
+| afterCreateDriver | $task, $preReturn, $index, $handlers | no effect |
+| beforeRun | $task, $preReturn, $index, $handlers | if `false` will stop run task and return `false` |
+| beforeDriverRun | $task, $preReturn, $index, $handlers | no effect |
+| afterDriverRun | $task, $preReturn, $index, $handlers | no effect |
+| afterRun | $task, $taskResult, $preReturn, $index, $handlers | if not boolean will override result value |
 
 ###Use Hooks
 
@@ -201,24 +201,24 @@ get data value of task instance.
 
 ```php
 //example
-$task->beforeRun(function($task, $preReturn, $index, $count){
+$task->beforeRun(function($task, $preReturn, $index, $handlers){
     //what is $preReturn?
     $preReturn == null; //true
     //what is $index?
     $index == 0; //true
-    //what is $count?
-    echo $count; //2
+    //what is $handlers?
+    echo count($handlers); //2
     //do something..
     return 'beforeRun_1';
 }, false);
 
-$task->beforeRun(function($task, $preReturn, $index, $count){
+$task->beforeRun(function($task, $preReturn, $index, $handlers){
     //what is $preReturn?
     $preReturn == 'beforeRun_1'; //true
     //what is $index?
     $index == 1; //true
-    //what is $count?
-    echo $count; //2
+    //what is $handlers?
+    echo count($handlers); //2
     //do other something..
 }, false);
 ```

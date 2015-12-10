@@ -16,36 +16,36 @@ Balancer::task('task1', $data, function($task){
                     print_r('run work! by '.$driver->name.'<br>');
                 });
 
-    $task->beforeRun(function($task, $preReturn, $index){
+    $task->beforeRun(function($task, $preReturn, $index, $handlers){
         print_r("before run ---$preReturn-----$index<br>");
         return 11;
     });
 
-    $task->beforeRun(function($task, $preReturn, $index){
+    $task->beforeRun(function($task, $preReturn, $index, $handlers){
         print_r("before run ---$preReturn-----$index<br>");
         return 22;
-    }, true);
+    }, false);
 
-    $task->beforeRun(function($task, $preReturn, $index){
+    $task->beforeRun(function($task, $preReturn, $index, $handlers){
         print_r("before run ---$preReturn-----$index<br>");
     });
 
-    $task->hook('beforeDriverRun', function($task, $preReturn, $index){
+    $task->hook('beforeDriverRun', function($task, $preReturn, $index, $handlers){
         print_r("before driver run ---$preReturn-----$index<br>");
         return [1];
     });
 
-    $task->hook('beforeDriverRun', function($task, $preReturn, $index){
+    $task->hook('beforeDriverRun', function($task, $preReturn, $index, $handlers){
         print_r("before driver run ---".implode(',', $preReturn)."-----$index<br>");
         return [1,2];
     }, true);
 
-    $task->hook('beforeDriverRun', function($task, $preReturn, $index){
+    $task->hook('beforeDriverRun', function($task, $preReturn, $index, $handlers){
         print_r("before driver run ---".implode(',', $preReturn)."-----$index<br>");
         return [1,2,3];
     });
 
-    $task->afterRun(function($task, $results){
+    $task->afterRun(function($task, $results, $preReturn, $index, $handlers){
         print_r("after run --------!<br>");
     });
 });

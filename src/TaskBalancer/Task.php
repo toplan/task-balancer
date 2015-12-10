@@ -524,11 +524,10 @@ class Task {
         if (array_key_exists($hookName, $this->handlers)) {
             $handlers = $this->handlers[$hookName] ?: [];
             $result = null;
-            $count = count($handlers);
             foreach ($handlers as $index => $handler) {
                 $handlerArgs = $data === null ?
-                               [$this, $result, $index, $count]:
-                               [$this, $data, $result, $index, $count];
+                               [$this, $result, $index, $handlers]:
+                               [$this, $data, $result, $index, $handlers];
                 $result = call_user_func_array($handler, $handlerArgs);
             }
             if ($result === null) {
