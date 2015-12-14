@@ -71,7 +71,7 @@ class Driver
         $this->task = $task;
         $this->name = $name;
         $this->weight = intval($weight);
-        $this->isBackUp = boolval($isBackUp);
+        $this->isBackUp = !!$isBackUp;
         $this->work = $work;
     }
 

@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.2.2'
+    composer require 'toplan/task-balancer:~0.2.3'
 ```
 
 # Usage
