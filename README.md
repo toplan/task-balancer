@@ -149,7 +149,7 @@ if null will continue try to get from task instance.
 >
 > `$data` equals to `$driver->getData()`
 
-### $driver->failed()
+### $driver->failure()
 
 set current driver run failed,
 support chain operation.

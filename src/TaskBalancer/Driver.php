@@ -141,7 +141,7 @@ class Driver
     /**
      * set driver run failed
      */
-    public function failed()
+    public function failure()
     {
         $this->success = false;
         return $this;
