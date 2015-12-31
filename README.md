@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.2.3'
+    composer require 'toplan/task-balancer:~0.3.0'
 ```
 
 # Usage
@@ -26,11 +26,11 @@ Balancer::task('task1', function($task){
     $task->driver('driver_1 100 backup', function($driver, $data){
                     //do something here
                     ...
-                    //set whether run success/failed at last
+                    //set whether run success/failure at last
                     if ($success) {
                         $driver->success();
                     } else {
-                        $driver->failed();
+                        $driver->failure();
                     }
                     //return some data you need
                     return 'some data here';
