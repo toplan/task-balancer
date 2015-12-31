@@ -15,13 +15,13 @@ class Balancer {
 
     /**
      * create a task instance
-     * @param      $name
-     * @param      $data
+     * @param string $name
+     * @param mixed  $data
      * @param \Closure|null $callback
      *
      * @return null|Task
      */
-    public static function task($name, $data, \Closure $callback = null)
+    public static function task($name, $data = null, \Closure $callback = null)
     {
         $task = self::getTask($name);
         if (!$task) {
@@ -38,21 +38,21 @@ class Balancer {
     /**
      * run a task instance
      * @param string $name
-     * @param string $data
-     * @param string $agentName
+     * @param array  $opts
      *
      * @return mixed
      * @throws TaskBalancerException
      */
-    public static function run($name = '', $data = null, $agentName = '')
+    public static function run($name = '', array $opts = [])
     {
         $task = self::getTask($name);
         if (!$task) {
             throw new TaskBalancerException("run task $name failed, not find this task");
         }
-        if ($data) {
-            $task->data($data);
+        if (isset($opts['data'])) {
+            $task->data($opts['data']);
         }
+        $agentName = isset($opts['agent']) ? $opts['agent'] : '';
         $results = $task->run((String) $agentName);
         $task->reset();
         return $results;
@@ -79,7 +79,7 @@ class Balancer {
      * get a task instance by name
      * @param $name
      *
-     * @return null
+     * @return null|object
      */
     public static function getTask($name)
     {

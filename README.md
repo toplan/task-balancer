@@ -93,10 +93,13 @@ Balancer::task('taskName', $data, function($task){
 
 > `$data` will store in task instance.
 
-### Balancer::run($taskName [, $data] [, $agentName])
+### Balancer::run($taskName [, array $opts])
 
-run the task, and return a results array.
-> If `$data` not equals to `null/0/''/[]` will override task data.
+run the task, and return a result array.
+
+The $opts value:
+* $opts['data']
+* $opts['agent']
 
 ### $task->data($data)
 
@@ -176,8 +179,8 @@ get data value of task instance.
 | beforeCreateDriver | $task, $preReturn, $index, $handlers | no effect |
 | afterCreateDriver | $task, $preReturn, $index, $handlers | no effect |
 | beforeRun | $task, $preReturn, $index, $handlers | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task, $preReturn, $index, $handlers | no effect |
-| afterDriverRun | $task, $preReturn, $index, $handlers | no effect |
+| beforeDriverRun | $task, $driver, $preReturn, $index, $handlers | no effect |
+| afterDriverRun | $task, $driverResult, $preReturn, $index, $handlers | no effect |
 | afterRun | $task, $taskResult, $preReturn, $index, $handlers | if not boolean will override result value |
 
 ###Use Hooks
@@ -229,6 +232,8 @@ $task->beforeRun(function($task, $preReturn, $index, $handlers){
 - [x] remember every driver`s start time and end time.
 - [x] smart parse arguments of method `driver()`.
 - [x] task lifecycle and hooks
+- [ ] use `backup:n` to set backup drivers order.
+- [ ] remove driver and add new driver.
 - [ ] pause/resume task
 
 # Dependents

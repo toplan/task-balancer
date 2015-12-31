@@ -201,7 +201,7 @@ class Task {
         $this->currentDriver = $driver;
         // before run a driver,
         // but current driver value is already change to this driver.
-        $this->callHookHandler('beforeDriverRun');
+        $this->callHookHandler('beforeDriverRun', $driver);
         // run driver
         $result = $driver->run();
         // result data
@@ -215,7 +215,7 @@ class Task {
         // store data
         $this->storeDriverResult($data);
         // after run driver
-        $this->callHookHandler('afterDriverRun');
+        $this->callHookHandler('afterDriverRun', $data);
         // weather to use backup driver
         if (!$success) {
             $backUpDriverName = $this->getNextBackupDriverName();
