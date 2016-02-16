@@ -1,14 +1,14 @@
 <?php
+
 namespace Toplan\TaskBalance;
 
 /**
- * Class Task
- * @package Toplan\TaskBalance
+ * Class Task.
  */
-class Task {
-
+class Task
+{
     /**
-     * task status
+     * task status.
      */
     const RUNNING = 'running';
 
@@ -17,7 +17,8 @@ class Task {
     const FINISHED = 'finished';
 
     /**
-     * task instance cycle life hooks
+     * task instance cycle life hooks.
+     *
      * @var array
      */
     protected static $hooks = [
@@ -30,70 +31,81 @@ class Task {
     ];
 
     /**
-     * task name
+     * task name.
+     *
      * @var
      */
     protected $name;
 
     /**
-     * task`s driver instances
+     * task`s driver instances.
+     *
      * @var array
      */
     protected $drivers = [];
 
     /**
-     * task`s back up drivers name
+     * task`s back up drivers name.
+     *
      * @var array
      */
     protected $backupDrivers = [];
 
     /**
-     * task status
+     * task status.
+     *
      * @var string
      */
     protected $status = '';
 
     /**
-     * current use driver
+     * current use driver.
+     *
      * @var null
      */
     protected $currentDriver = null;
 
     /**
-     * task work
+     * task work.
+     *
      * @var null
      */
     protected $work = null;
 
     /**
-     * task run time
+     * task run time.
+     *
      * @var array
      */
     protected $time = [
-        'started_at' => 0,
-        'finished_at' => 0
+        'started_at'  => 0,
+        'finished_at' => 0,
     ];
 
     /**
-     * data for driver
+     * data for driver.
+     *
      * @var null
      */
     protected $data = null;
 
     /**
-     * drivers` results
+     * drivers` results.
+     *
      * @var array
      */
     protected $results = [];
 
     /**
-     * handlers for hooks
+     * handlers for hooks.
+     *
      * @var array
      */
     protected $handlers = [];
 
     /**
-     * constructor
+     * constructor.
+     *
      * @param               $name
      * @param               $data
      * @param \Closure|null $work
@@ -106,21 +118,24 @@ class Task {
     }
 
     /**
-     * create a new task
+     * create a new task.
+     *
      * @param               $name
      * @param               $data
      * @param \Closure|null $work
+     *
      * @return Task
      */
     public static function create($name, $data = null, \Closure $work = null)
     {
         $task = new self($name, $data, $work);
         $task->runWork();
+
         return $task;
     }
 
     /**
-     * run work
+     * run work.
      */
     public function runWork()
     {
@@ -130,11 +145,13 @@ class Task {
     }
 
     /**
-     * run task
+     * run task.
+     *
      * @param string $driverName
      *
-     * @return bool
      * @throws \Exception
+     *
+     * @return bool
      */
     public function run($driverName = '')
     {
@@ -150,11 +167,13 @@ class Task {
         }
         $this->resortBackupDrivers($driverName);
         $success = $this->runDriver($driverName);
+
         return $this->afterRun($success);
     }
 
     /**
-     * before run task
+     * before run task.
+     *
      * @return bool
      */
     protected function beforeRun()
@@ -164,11 +183,13 @@ class Task {
             $this->status = static::RUNNING;
             $this->time['started_at'] = microtime();
         }
+
         return $pass;
     }
 
     /**
-     * after run task
+     * after run task.
+     *
      * @param $success
      *
      * @return mixed
@@ -182,15 +203,18 @@ class Task {
         $return['time'] = $this->time;
         $return['logs'] = $this->results;
         $data = $this->callHookHandler('afterRun', $return);
+
         return is_bool($data) ? $return : $data;
     }
 
     /**
-     * run driver by name
+     * run driver by name.
+     *
      * @param $name
      *
-     * @return bool
      * @throws TaskBalancerException
+     *
+     * @return bool
      */
     public function runDriver($name)
     {
@@ -207,10 +231,10 @@ class Task {
         // result data
         $success = $driver->success;
         $data = [
-            'driver' => $driver->name,
-            'time' => $driver->time,
+            'driver'  => $driver->name,
+            'time'    => $driver->time,
             'success' => $success,
-            'result' => $result,
+            'result'  => $result,
         ];
         // store data
         $this->storeDriverResult($data);
@@ -220,17 +244,19 @@ class Task {
         if (!$success) {
             $backUpDriverName = $this->getNextBackupDriverName();
             if ($backUpDriverName) {
-               // try to run a backup driver
+                // try to run a backup driver
                return $this->runDriver($backUpDriverName);
             }
             // not find a backup driver, current driver must be run false.
             return false;
         }
+
         return true;
     }
 
     /**
-     * store driver run result data
+     * store driver run result data.
+     *
      * @param $data
      */
     public function storeDriverResult($data)
@@ -244,7 +270,8 @@ class Task {
     }
 
     /**
-     * generator a back up driver`s name
+     * generator a back up driver`s name.
+     *
      * @return null
      */
     public function getNextBackupDriverName()
@@ -252,25 +279,28 @@ class Task {
         $drivers = $this->backupDrivers;
         $currentDriverName = $this->currentDriver->name;
         if (!count($drivers)) {
-            return null;
+            return;
         }
         if (!in_array($currentDriverName, $drivers)) {
             return $drivers[0];
         }
         if (in_array($currentDriverName, $drivers) && count($drivers) == 1) {
-            return null;
+            return;
         }
         $currentKey = array_search($currentDriverName, $drivers);
         if (($currentKey + 1) < count($drivers)) {
             return $drivers[$currentKey + 1];
         }
-        return null;
+
+        return;
     }
 
     /**
-     * get a driver`s name by drivers` weight
-     * @return mixed
+     * get a driver`s name by drivers` weight.
+     *
      * @throws TaskBalancerException
+     *
+     * @return mixed
      */
     public function getDriverNameByWeight()
     {
@@ -281,8 +311,8 @@ class Task {
             if ($driver->weight) {
                 $max = $base + $driver->weight;
                 $map[] = [
-                    'min' => $base,
-                    'max' => $max,
+                    'min'    => $base,
+                    'max'    => $max,
                     'driver' => $driver->name,
                 ];
                 $base = $max;
@@ -301,7 +331,8 @@ class Task {
     }
 
     /**
-     * get a driver name
+     * get a driver name.
+     *
      * @return mixed
      */
     public function driverNameRand()
@@ -309,11 +340,12 @@ class Task {
         return array_rand(array_keys($this->drivers));
     }
 
-
     /**
-     * create a new driver instance for current task
-     * @return null|static
+     * create a new driver instance for current task.
+     *
      * @throws TaskBalancerException
+     *
+     * @return null|static
      */
     public function driver()
     {
@@ -335,11 +367,13 @@ class Task {
             }
             $this->callHookHandler('afterCreateDriver');
         }
+
         return $driver;
     }
 
     /**
-     * parse arguments for method `driver()`
+     * parse arguments for method `driver()`.
+     *
      * @param $args
      *
      * @return array
@@ -347,9 +381,9 @@ class Task {
     protected function parseDriverArgs($args)
     {
         $result = [
-            'name' => '',
-            'work' => null,
-            'weight' => 1,
+            'name'     => '',
+            'work'     => null,
+            'weight'   => 1,
             'isBackup' => false,
         ];
         foreach ($args as $arg) {
@@ -372,11 +406,13 @@ class Task {
                 }
             }
         }
+
         return $result;
     }
 
     /**
      * current task has character driver?
+     *
      * @param $name
      *
      * @return bool
@@ -386,11 +422,13 @@ class Task {
         if (!$this->drivers) {
             return false;
         }
+
         return isset($this->drivers[$name]);
     }
 
     /**
-     * get a driver from current task drives pool
+     * get a driver from current task drives pool.
+     *
      * @param $name
      *
      * @return null
@@ -400,11 +438,13 @@ class Task {
         if ($this->hasDriver($name)) {
             return $this->drivers[$name];
         }
-        return null;
+
+        return;
     }
 
     /**
-     * init back up drivers
+     * init back up drivers.
+     *
      * @param $name
      */
     public function resortBackupDrivers($name)
@@ -422,6 +462,7 @@ class Task {
 
     /**
      * task is running ?
+     *
      * @return bool
      */
     public function isRunning()
@@ -430,18 +471,21 @@ class Task {
     }
 
     /**
-     * reset status
+     * reset status.
+     *
      * @return $this
      */
     public function reset()
     {
         $this->status = '';
         $this->results = null;
+
         return $this;
     }
 
     /**
-     * add a driver to backup drivers
+     * add a driver to backup drivers.
+     *
      * @param $driverName
      */
     public function addToBackupDrivers($driverName)
@@ -455,7 +499,8 @@ class Task {
     }
 
     /**
-     * remove character driver from backup drivers
+     * remove character driver from backup drivers.
+     *
      * @param $driverName
      */
     public function removeFromBackupDrivers($driverName)
@@ -471,7 +516,8 @@ class Task {
     }
 
     /**
-     * set data
+     * set data.
+     *
      * @param $data
      *
      * @return $this
@@ -479,14 +525,16 @@ class Task {
     public function data($data)
     {
         $this->data = $data;
+
         return $this;
     }
 
     /**
-     * set hook handler
+     * set hook handler.
+     *
      * @param      $hookName
      * @param null $handler
-     * @param boolean $override
+     * @param bool $override
      *
      * @throws TaskBalancerException
      */
@@ -513,7 +561,8 @@ class Task {
     }
 
     /**
-     * call hook handler
+     * call hook handler.
+     *
      * @param $hookName
      * @param $data
      *
@@ -526,20 +575,23 @@ class Task {
             $result = null;
             foreach ($handlers as $index => $handler) {
                 $handlerArgs = $data === null ?
-                               [$this, $result, $index, $handlers]:
+                               [$this, $result, $index, $handlers] :
                                [$this, $data, $result, $index, $handlers];
                 $result = call_user_func_array($handler, $handlerArgs);
             }
             if ($result === null) {
                 return true;
             }
+
             return $result;
         }
+
         return true;
     }
 
     /**
-     * properties overload
+     * properties overload.
+     *
      * @param $name
      *
      * @return null
@@ -552,11 +604,13 @@ class Task {
         if (array_key_exists($name, $this->drivers)) {
             return $this->drivers[$name];
         }
-        return null;
+
+        return;
     }
 
     /**
-     * method overload
+     * method overload.
+     *
      * @param $name
      * @param $args
      *
@@ -566,7 +620,7 @@ class Task {
     {
         if (in_array($name, self::$hooks)) {
             if (isset($args[0]) && is_callable($args[0])) {
-                $override = isset($args[1]) ? !!$args[1] : false;
+                $override = isset($args[1]) ? (bool) $args[1] : false;
                 $this->hook($name, $args[0], $override);
             } else {
                 throw new TaskBalancerException("Please give the method [$name()] a callable argument");
