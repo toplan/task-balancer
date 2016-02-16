@@ -1,7 +1,7 @@
 # Intro
 lightweight and powerful task load balancing for php
 
-> like the nginx load balancing :)
+> like the `nginx` load balancing :)
 
 # Features
 
@@ -99,7 +99,7 @@ run the task, and return a result array.
 
 The $opts value:
 * $opts['data']
-* $opts['agent']
+* $opts['driver']
 
 ### $task->data($data)
 
@@ -232,7 +232,6 @@ $task->beforeRun(function($task, $preReturn, $index, $handlers){
 - [x] remember every driver`s start time and end time.
 - [x] smart parse arguments of method `driver()`.
 - [x] task lifecycle and hooks
-- [ ] use `backup:n` to set backup drivers order.
 - [ ] remove driver and add new driver.
 - [ ] pause/resume task
 

@@ -52,8 +52,10 @@ class Balancer {
         if (isset($opts['data'])) {
             $task->data($opts['data']);
         }
-        $agentName = isset($opts['agent']) ? $opts['agent'] : '';
-        $results = $task->run((String) $agentName);
+        $driverName = isset($opts['driver']) ?
+                      $opts['driver'] : (isset($opts['agent']) ?
+                      $opts['agent'] : '');
+        $results = $task->run((String) $driverName);
         $task->reset();
         return $results;
     }
