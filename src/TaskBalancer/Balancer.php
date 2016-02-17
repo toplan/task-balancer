@@ -1,22 +1,24 @@
 <?php
+
 namespace Toplan\TaskBalance;
 
 /**
- * Class Balancer
- * @package Toplan\TaskBalance
+ * Class Balancer.
  */
-class Balancer {
-
+class Balancer
+{
     /**
-     * task instances
+     * task instances.
+     *
      * @var array
      */
     protected static $tasks = [];
 
     /**
-     * create a task instance
-     * @param string $name
-     * @param mixed  $data
+     * create a task instance.
+     *
+     * @param string        $name
+     * @param mixed         $data
      * @param \Closure|null $callback
      *
      * @return null|Task
@@ -32,16 +34,19 @@ class Balancer {
             $task = Task::create($name, $data, $callback);
             self::$tasks[$name] = $task;
         }
+
         return $task;
     }
 
     /**
-     * run a task instance
+     * run a task instance.
+     *
      * @param string $name
      * @param array  $opts
      *
-     * @return mixed
      * @throws TaskBalancerException
+     *
+     * @return mixed
      */
     public static function run($name = '', array $opts = [])
     {
@@ -55,13 +60,15 @@ class Balancer {
         $driverName = isset($opts['driver']) ?
                       $opts['driver'] : (isset($opts['agent']) ?
                       $opts['agent'] : '');
-        $results = $task->run((String) $driverName);
+        $results = $task->run((string) $driverName);
         $task->reset();
+
         return $results;
     }
 
     /**
-     * whether has task
+     * whether has task.
+     *
      * @param $name
      *
      * @return bool
@@ -74,11 +81,13 @@ class Balancer {
         if (isset(self::$tasks[$name])) {
             return true;
         }
+
         return false;
     }
 
     /**
-     * get a task instance by name
+     * get a task instance by name.
+     *
      * @param $name
      *
      * @return null|object
@@ -88,6 +97,7 @@ class Balancer {
         if (self::hasTask($name)) {
             return self::$tasks[$name];
         }
-        return null;
+
+        return;
     }
 }

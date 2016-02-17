@@ -1,65 +1,74 @@
 <?php
+
 namespace Toplan\TaskBalance;
 
 /**
- * Class Driver
- * @package Toplan\TaskBalance
+ * Class Driver.
  */
 class Driver
 {
     /**
-     * driver name
+     * driver name.
+     *
      * @var
      */
     protected $name;
 
     /**
-     * task instance
+     * task instance.
+     *
      * @var
      */
     protected $task;
 
     /**
-     * driver run successful
+     * driver run successful.
+     *
      * @var bool
      */
     protected $success = false;
 
     /**
-     * weight
+     * weight.
+     *
      * @var int
      */
     protected $weight = 1;
 
     /**
-     * is back up driver
+     * is back up driver.
+     *
      * @var bool
      */
     protected $isBackUp = false;
 
     /**
-     * driver`s work
+     * driver`s work.
+     *
      * @var null
      */
     protected $work = null;
 
     /**
-     * data for run work
+     * data for run work.
+     *
      * @var null
      */
     protected $data = null;
 
     /**
-     * run work time
+     * run work time.
+     *
      * @var array
      */
     protected $time = [
-        'started_at' => 0,
+        'started_at'  => 0,
         'finished_at' => 0,
     ];
 
     /**
-     * constructor
+     * constructor.
+     *
      * @param            $task
      * @param            $name
      * @param int        $weight
@@ -71,12 +80,13 @@ class Driver
         $this->task = $task;
         $this->name = $name;
         $this->weight = intval($weight);
-        $this->isBackUp = !!$isBackUp;
+        $this->isBackUp = (bool) $isBackUp;
         $this->work = $work;
     }
 
     /**
-     * create a driver instance
+     * create a driver instance.
+     *
      * @param            $task
      * @param            $name
      * @param int        $weight
@@ -88,37 +98,43 @@ class Driver
     public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
     {
         $driver = new self($task, $name, $weight, $isBackUp, $work);
+
         return $driver;
     }
 
     /**
-     * before run driver work
+     * before run driver work.
+     *
      * @return bool
      */
     protected function beforeRun()
     {
         $this->time['started_at'] = microtime();
+
         return true;
     }
 
     /**
-     * run driver`s work
+     * run driver`s work.
+     *
      * @return mixed|null
      */
     public function run()
     {
         if (!$this->beforeRun()) {
-            return null;
+            return;
         }
         $result = null;
         if (is_callable($this->work)) {
             $result = call_user_func_array($this->work, [$this, $this->getData()]);
         }
+
         return $this->afterRun($result);
     }
 
     /**
-     * after run driver work
+     * after run driver work.
+     *
      * @param $result
      *
      * @return mixed
@@ -126,24 +142,27 @@ class Driver
     protected function afterRun($result)
     {
         $this->time['finished_at'] = microtime();
+
         return $result;
     }
 
     /**
-     * set driver run success
+     * set driver run success.
      */
     public function success()
     {
         $this->success = true;
+
         return $this;
     }
 
     /**
-     * set driver run failed
+     * set driver run failed.
      */
     public function failure()
     {
         $this->success = false;
+
         return $this;
     }
 
@@ -155,6 +174,7 @@ class Driver
     public function data($data)
     {
         $this->data = $data;
+
         return $this;
     }
 
@@ -166,6 +186,7 @@ class Driver
     public function weight($weight)
     {
         $this->weight = intval($weight);
+
         return $this;
     }
 
@@ -176,13 +197,14 @@ class Driver
      */
     public function backUp($is = true)
     {
-        $this->isBackUp = (Boolean) $is;
+        $this->isBackUp = (bool) $is;
         if ($is) {
             $this->task->addToBackupDrivers($this);
         }
         if (!$is) {
             $this->task->removeFromBackupDrivers($this);
         }
+
         return $this;
     }
 
@@ -194,11 +216,13 @@ class Driver
     public function work(\Closure $work)
     {
         $this->work = $work;
+
         return $this;
     }
 
     /**
-     * get data
+     * get data.
+     *
      * @return null
      */
     public function getData()
@@ -208,7 +232,8 @@ class Driver
     }
 
     /**
-     * get driver data
+     * get driver data.
+     *
      * @return null
      */
     public function getDriverData()
@@ -217,7 +242,8 @@ class Driver
     }
 
     /**
-     * get task data
+     * get task data.
+     *
      * @return null
      */
     public function getTaskData()
@@ -226,19 +252,21 @@ class Driver
     }
 
     /**
-     * override
+     * override.
+     *
      * @param $name
      *
      * @return null
      */
     public function __get($name)
     {
-        if ($name == "data") {
+        if ($name == 'data') {
             return $this->getData();
         }
         if (isset($this->$name)) {
             return $this->$name;
         }
-        return null;
+
+        return;
     }
 }
