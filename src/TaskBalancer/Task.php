@@ -289,8 +289,6 @@ class Task
         if (($currentKey + 1) < count($drivers)) {
             return $drivers[$currentKey + 1];
         }
-
-        return;
     }
 
     /**
@@ -315,7 +313,7 @@ class Task
             }
         }
         if ($count <= 0) {
-            return null;
+            return;
         }
         $number = mt_rand(0, $count - 1);
         foreach ($map as $data) {
@@ -323,6 +321,7 @@ class Task
                 return $data['driver'];
             }
         }
+
         return array_rand(array_keys($this->drivers));
     }
 
@@ -424,8 +423,6 @@ class Task
         if ($this->hasDriver($name)) {
             return $this->drivers[$name];
         }
-
-        return;
     }
 
     /**
@@ -590,8 +587,6 @@ class Task
         if (array_key_exists($name, $this->drivers)) {
             return $this->drivers[$name];
         }
-
-        return;
     }
 
     /**
