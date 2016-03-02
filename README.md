@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.3.0'
+    composer require 'toplan/task-balancer:~0.4.0'
 ```
 
 # Usage
@@ -232,7 +232,7 @@ $task->beforeRun(function($task, $preReturn, $index, $handlers){
 - [x] remember every driver`s start time and end time.
 - [x] smart parse arguments of method `driver()`.
 - [x] task lifecycle and hooks
-- [ ] remove driver and add new driver.
+- [ ] hot remove/add a driver.
 - [ ] pause/resume task
 
 # Dependents

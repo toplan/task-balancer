@@ -97,7 +97,5 @@ class Balancer
         if (self::hasTask($name)) {
             return self::$tasks[$name];
         }
-
-        return;
     }
 }

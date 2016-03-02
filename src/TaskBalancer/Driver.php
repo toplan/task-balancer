@@ -266,7 +266,5 @@ class Driver
         if (isset($this->$name)) {
             return $this->$name;
         }
-
-        return;
     }
 }

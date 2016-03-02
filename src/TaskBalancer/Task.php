@@ -54,9 +54,9 @@ class Task
     /**
      * task status.
      *
-     * @var string
+     * @var string|null
      */
-    protected $status = '';
+    protected $status = null;
 
     /**
      * current use driver.
@@ -212,15 +212,13 @@ class Task
      *
      * @param $name
      *
-     * @throws TaskBalancerException
-     *
      * @return bool
      */
     public function runDriver($name)
     {
         $driver = $this->getDriver($name);
         if (!$driver) {
-            throw new TaskBalancerException("Don`t found driver [$name] in task [$this->name], please define it for current task");
+            return false;
         }
         $this->currentDriver = $driver;
         // before run a driver,
@@ -291,14 +289,10 @@ class Task
         if (($currentKey + 1) < count($drivers)) {
             return $drivers[$currentKey + 1];
         }
-
-        return;
     }
 
     /**
-     * get a driver`s name by drivers` weight.
-     *
-     * @throws TaskBalancerException
+     * get a driver name by driver weight.
      *
      * @return mixed
      */
@@ -318,8 +312,8 @@ class Task
                 $base = $max;
             }
         }
-        if ($count < 1) {
-            return $this->driverNameRand();
+        if ($count <= 0) {
+            return;
         }
         $number = mt_rand(0, $count - 1);
         foreach ($map as $data) {
@@ -327,16 +321,7 @@ class Task
                 return $data['driver'];
             }
         }
-        throw new TaskBalancerException('Get driver name by weight failed, something wrong');
-    }
 
-    /**
-     * get a driver name.
-     *
-     * @return mixed
-     */
-    public function driverNameRand()
-    {
         return array_rand(array_keys($this->drivers));
     }
 
@@ -431,15 +416,13 @@ class Task
      *
      * @param $name
      *
-     * @return null
+     * @return mixed
      */
     public function getDriver($name)
     {
         if ($this->hasDriver($name)) {
             return $this->drivers[$name];
         }
-
-        return;
     }
 
     /**
@@ -477,7 +460,7 @@ class Task
      */
     public function reset()
     {
-        $this->status = '';
+        $this->status = null;
         $this->results = null;
 
         return $this;
@@ -604,8 +587,6 @@ class Task
         if (array_key_exists($name, $this->drivers)) {
             return $this->drivers[$name];
         }
-
-        return;
     }
 
     /**
