@@ -273,7 +273,8 @@ class Task
     }
 
     /**
-     * try to use next backup driver
+     * try to use next backup driver.
+     *
      * @return bool
      */
     public function tryNextDriver()
