@@ -216,17 +216,26 @@ class Task
      */
     public function runDriver($name)
     {
+        // if not find driver by the name,
+        // will stop and return false
         $driver = $this->getDriver($name);
         if (!$driver) {
             return false;
         }
         $this->currentDriver = $driver;
-        // before run a driver,
+
+        // before run a driver, call 'beforeDriverRun' hooks,
         // but current driver value is already change to this driver.
-        $this->callHookHandler('beforeDriverRun', $driver);
-        // run driver
+        // If 'beforeDriverRun' hook return false,
+        // will stop use current driver and try to use next driver
+        $currentDriverEnable = $this->callHookHandler('beforeDriverRun', $driver);
+        if (!$currentDriverEnable) {
+            return $this->tryNextDriver();
+        }
+
+        // start run current driver,
+        // and store result
         $result = $driver->run();
-        // result data
         $success = $driver->success;
         $data = [
             'driver'  => $driver->name,
@@ -234,19 +243,15 @@ class Task
             'success' => $success,
             'result'  => $result,
         ];
-        // store data
         $this->storeDriverResult($data);
-        // after run driver
+
+        // call 'afterDriverRun' hooks
         $this->callHookHandler('afterDriverRun', $data);
-        // weather to use backup driver
+
+        // weather to use backup driver,
+        // if failed will try to use next backup driver
         if (!$success) {
-            $backUpDriverName = $this->getNextBackupDriverName();
-            if ($backUpDriverName) {
-                // try to run a backup driver
-               return $this->runDriver($backUpDriverName);
-            }
-            // not find a backup driver, current driver must be run false.
-            return false;
+            return $this->tryNextDriver();
         }
 
         return true;
@@ -265,6 +270,21 @@ class Task
         if ($data) {
             array_push($this->results, $data);
         }
+    }
+
+    /**
+     * try to use next backup driver
+     * @return bool
+     */
+    public function tryNextDriver()
+    {
+        $backUpDriverName = $this->getNextBackupDriverName();
+        if ($backUpDriverName) {
+            // try to run a backup driver
+           return $this->runDriver($backUpDriverName);
+        }
+        // not find a backup driver, current driver must be run false.
+        return false;
     }
 
     /**
