@@ -100,7 +100,7 @@ class Balancer
     }
 
     /**
-     * destroy a task
+     * destroy a task.
      *
      * @param $name
      */
