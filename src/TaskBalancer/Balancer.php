@@ -98,4 +98,21 @@ class Balancer
             return self::$tasks[$name];
         }
     }
+
+    /**
+     * destroy a task
+     *
+     * @param $name
+     */
+    public static function destroy($name)
+    {
+        if (is_array($name)) {
+            foreach ($name as $v) {
+                self::destroy($v);
+            }
+        } elseif (is_string($name) && self::hasTask($name)) {
+            self::$tasks[$name] = null;
+            unset(self::$tasks[$name]);
+        }
+    }
 }

@@ -482,6 +482,9 @@ class Task
     {
         $this->status = null;
         $this->results = null;
+        $this->currentDriver = null;
+        $this->time['started_at'] = 0;
+        $this->time['finished_at'] = 0;
 
         return $this;
     }
