@@ -13,7 +13,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.4.1'
+    composer require 'toplan/task-balancer:~0.4.2'
 ```
 
 # Usage
@@ -179,7 +179,7 @@ get data value of task instance.
 | beforeCreateDriver | $task, $preReturn, $index, $handlers | no effect |
 | afterCreateDriver | $task, $preReturn, $index, $handlers | no effect |
 | beforeRun | $task, $preReturn, $index, $handlers | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task, $driver, $preReturn, $index, $handlers | if `false` will stop run current driver and try to use next backup driver |
+| beforeDriverRun | $task, $driver, $preReturn, $index, $handlers | if `false` will stop to use current driver and try to use next backup driver |
 | afterDriverRun | $task, $driverResult, $preReturn, $index, $handlers | no effect |
 | afterRun | $task, $taskResult, $preReturn, $index, $handlers | if not boolean will override result value |
 

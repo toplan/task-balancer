@@ -227,7 +227,7 @@ class Task
         // before run a driver, call 'beforeDriverRun' hooks,
         // but current driver value is already change to this driver.
         // If 'beforeDriverRun' hook return false,
-        // will stop use current driver and try to use next driver
+        // will stop to use current driver and try to use next driver
         $currentDriverEnable = $this->callHookHandler('beforeDriverRun', $driver);
         if (!$currentDriverEnable) {
             return $this->tryNextDriver();
@@ -483,6 +483,9 @@ class Task
     {
         $this->status = null;
         $this->results = null;
+        $this->currentDriver = null;
+        $this->time['started_at'] = 0;
+        $this->time['finished_at'] = 0;
 
         return $this;
     }
