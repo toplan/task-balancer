@@ -1,6 +1,6 @@
 <?php
 
-namespace Toplan\TaskBalance;
+namespace Toplan\TaskBalance; 
 
 /**
  * Class Driver.
@@ -108,7 +108,7 @@ class Driver
      * @return bool
      */
     protected function beforeRun()
-    {
+    {                        
         $this->time['started_at'] = microtime();
 
         return true;
@@ -140,7 +140,7 @@ class Driver
      * @return mixed
      */
     protected function afterRun($result)
-    {
+    {              
         $this->time['finished_at'] = microtime();
 
         return $result;

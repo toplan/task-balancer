@@ -1,6 +1,6 @@
 <?php
 
-namespace Toplan\TaskBalance;
+namespace Toplan\TaskBalance;        
 
 /**
  * Class Task.
@@ -180,7 +180,7 @@ class Task
     {
         $pass = $this->callHookHandler('beforeRun');
         if ($pass) {
-            $this->status = static::RUNNING;
+            $this->status = static::RUNNING; 
             $this->time['started_at'] = microtime();
         }
 
@@ -196,8 +196,8 @@ class Task
      */
     protected function afterRun($success)
     {
-        $this->status = static::FINISHED;
-        $this->time['finished_at'] = microtime();
+        $this->status = static::FINISHED;    
+        $this->time['finished_at'] = microtime();  
         $return = [];
         $return['success'] = $success;
         $return['time'] = $this->time;
