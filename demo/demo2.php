@@ -13,7 +13,7 @@ use Toplan\TaskBalance\Balancer;
 //define task:
 Balancer::task('task1', $data, function ($task) {
     $task->driver('driver1 10 backup', function ($driver, $data) {
-                    $driver->failed();
+                    $driver->failure();
                     print_r('run work! by '.$driver->name.'<br>');
                 });
 
@@ -56,8 +56,12 @@ Balancer::task('task1', $data, function ($task) {
     });
 });
 
+$data = [
+    'some' => 'data'
+];
+
 //run task:
 $result = Balancer::run('task1', $data);
 
 print_r('<br>');
-print_r($result);
+var_dump($result);
