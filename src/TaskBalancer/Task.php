@@ -26,11 +26,11 @@ class Task
     ];
 
     /**
-     * task name.
+     * task name (optional).
      *
-     * @var
+     * @var string|null
      */
-    protected $name;
+    protected $name = null;
 
     /**
      * drivers of task.
@@ -56,7 +56,7 @@ class Task
     /**
      * current driver.
      *
-     * @var Driver
+     * @var Driver|null
      */
     protected $currentDriver = null;
 
@@ -94,31 +94,31 @@ class Task
     /**
      * constructor.
      *
-     * @param               $name
-     * @param               $data
-     * @param \Closure|null $ready
+     * @param mixed $data
      */
-    public function __construct($name, $data = null, \Closure $ready = null)
+    public function __construct($data = null)
     {
-        $this->name = $name;
-        $this->data = $data;
-        if (is_callable($ready)) {
-            call_user_func($ready, $this);
-        }
+        $this->data($data);
     }
 
     /**
      * create a new task.
      *
-     * @param               $name
-     * @param               $data
+     * @param string|null   $name
+     * @param mixed         $data
      * @param \Closure|null $ready
      *
      * @return Task
      */
-    public static function create($name, $data = null, \Closure $ready = null)
+    public static function create($name = null, $data = null, \Closure $ready = null)
     {
-        return new self($name, $data, $ready);
+        $task = new self($data);
+        $task->name($name);
+        if (is_callable($ready)) {
+            call_user_func($ready, $task);
+        }
+
+        return $task;
     }
 
     /**
@@ -165,6 +165,22 @@ class Task
     }
 
     /**
+     * reset states.
+     *
+     * @return $this
+     */
+    protected function reset()
+    {
+        $this->status = null;
+        $this->results = [];
+        $this->currentDriver = null;
+        $this->time['started_at'] = 0;
+        $this->time['finished_at'] = 0;
+
+        return $this;
+    }
+
+    /**
      * after run task.
      *
      * @param bool $success
@@ -198,7 +214,7 @@ class Task
         // if not found driver by the name, throw exception.
         $driver = $this->getDriver($name);
         if (!$driver) {
-            throw new TaskBalancerException("Not found driver `$name`, please define it.");
+            return false;
         }
         $this->currentDriver = $driver;
 
@@ -283,8 +299,6 @@ class Task
     /**
      * create a new driver instance for current task.
      *
-     * @throws TaskBalancerException
-     *
      * @return Driver
      */
     public function driver()
@@ -306,7 +320,7 @@ class Task
     /**
      * has driver.
      *
-     * @param $name
+     * @param string $name
      *
      * @return bool
      */
@@ -322,7 +336,7 @@ class Task
     /**
      * get a driver by name.
      *
-     * @param $name
+     * @param string $name
      *
      * @return Driver|null
      */
@@ -376,22 +390,6 @@ class Task
     }
 
     /**
-     * reset states.
-     *
-     * @return $this
-     */
-    public function reset()
-    {
-        $this->status = null;
-        $this->results = [];
-        $this->currentDriver = null;
-        $this->time['started_at'] = 0;
-        $this->time['finished_at'] = 0;
-
-        return $this;
-    }
-
-    /**
      * append driver to backup drivers.
      *
      * @param Driver|string $driver
@@ -423,9 +421,27 @@ class Task
     }
 
     /**
-     * set data.
+     * set the name of task.
      *
-     * @param $data
+     * @param string $name
+     *
+     * @return $this
+     * @throws TaskBalancerException
+     */
+    public function name($name)
+    {
+        if (!is_string($name) || empty($name)) {
+            throw new TaskBalancerException('Expected task name to be a non-empty string.');
+        }
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * set the data of task.
+     *
+     * @param mixed $data
      *
      * @return $this
      */
@@ -437,17 +453,17 @@ class Task
     }
 
     /**
-     * set hook handler.
+     * set hook's handlers.
      *
-     * @param      $hookName
-     * @param null $handler
-     * @param bool $override
+     * @param string|array  $hookName
+     * @param \Closure|bool $handler
+     * @param bool          $override
      *
      * @throws TaskBalancerException
      */
     public function hook($hookName, $handler = null, $override = false)
     {
-        if ($handler && is_callable($handler) && is_string($hookName)) {
+        if (is_callable($handler) && is_string($hookName)) {
             if (in_array($hookName, self::$hooks)) {
                 if (!isset($this->handlers[$hookName])) {
                     $this->handlers[$hookName] = [];
@@ -461,19 +477,22 @@ class Task
                 throw new TaskBalancerException("Don't support hooks `$hookName`.");
             }
         } elseif (is_array($hookName)) {
-            foreach ($hookName as $k => $h) {
-                $this->hook($k, $h, false);
+            if (is_bool($handler) && $handler) {
+                $this->handlers = [];
+            }
+            foreach ($hookName as $k => $v) {
+                $this->hook($k, $v, false);
             }
         }
     }
 
     /**
-     * call hook handler.
+     * call hook's handlers.
      *
-     * @param $hookName
-     * @param $data
+     * @param string $hookName
+     * @param mixed  $data
      *
-     * @return mixed|null
+     * @return mixed
      */
     protected function callHookHandler($hookName, $data = null)
     {
@@ -499,25 +518,37 @@ class Task
     /**
      * properties overload.
      *
-     * @param $name
+     * @param string $name
      *
-     * @return null
+     * @return mixed
      */
     public function __get($name)
     {
         if (isset($this->$name)) {
             return $this->$name;
         }
-        if (array_key_exists($name, $this->drivers)) {
+        if (isset($this->drivers[$name])) {
             return $this->drivers[$name];
         }
     }
 
     /**
+     * correct methods 'isset' and 'empty'
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this->$name) ?: isset($this->drivers[$name]);
+    }
+
+    /**
      * method overload.
      *
-     * @param $name
-     * @param $args
+     * @param string $name
+     * @param array  $args
      *
      * @throws TaskBalancerException
      */
@@ -527,8 +558,6 @@ class Task
             if (isset($args[0]) && is_callable($args[0])) {
                 $override = isset($args[1]) ? (bool) $args[1] : false;
                 $this->hook($name, $args[0], $override);
-            } else {
-                throw new TaskBalancerException("The methods `$name` must be called with a callable argument.");
             }
         } else {
             throw new TaskBalancerException("Not found methods `$name`.");

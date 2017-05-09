@@ -79,7 +79,7 @@ class Driver
      */
     public function __construct(Task $task, $name, $weight = 1, $backup = false, \Closure $work = null)
     {
-        if (!is_string($name) || !$name) {
+        if (!is_string($name) || empty($name)) {
             throw new TaskBalancerException('Expected the driver name to be a non-empty string.');
         }
         if ($task->hasDriver($name)) {
@@ -125,7 +125,7 @@ class Driver
     /**
      * run driver`s work.
      *
-     * @return mixed|null
+     * @return mixed
      */
     public function run()
     {
@@ -216,7 +216,7 @@ class Driver
             return $this;
         }
         $this->backup = $is;
-        if ($is) {
+        if ($this->backup) {
             $this->task->appendToBackupDrivers($this);
         } else {
             $this->task->removeFromBackupDrivers($this);
@@ -240,9 +240,9 @@ class Driver
     }
 
     /**
-     * update driver's attributes.
+     * reset driver's properties.
      */
-    public function update()
+    public function reset()
     {
         $args = func_get_args();
         extract(self::parseArgs($args));
@@ -300,7 +300,7 @@ class Driver
     /**
      * override.
      *
-     * @param $name
+     * @param string $name
      *
      * @return mixed
      */
@@ -315,7 +315,7 @@ class Driver
     }
 
     /**
-     * parse arguments.
+     * parse arguments to driver properties.
      *
      * @param array $args
      *

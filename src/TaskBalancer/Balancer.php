@@ -10,7 +10,7 @@ class Balancer
     /**
      * task instances.
      *
-     * @var array
+     * @var Task[]
      */
     protected static $tasks = [];
 
@@ -21,7 +21,7 @@ class Balancer
      * @param mixed         $data
      * @param \Closure|null $ready
      *
-     * @return null|Task
+     * @return Task
      */
     public static function task($name, $data = null, \Closure $ready = null)
     {
@@ -39,7 +39,7 @@ class Balancer
     }
 
     /**
-     * run a task instance.
+     * run task.
      *
      * @param string $name
      * @param array  $opts

@@ -15,9 +15,9 @@ $data = [];
 //define task:
 Balancer::task('task1', $data, function ($task) {
     $task->driver('driver1 10 backup', function ($driver, $data) {
-                    $driver->failure();
-                    print_r('run work! by '.$driver->name.'<br>');
-                });
+        $driver->failure();
+        print_r('run work! by '.$driver->name.'<br>');
+    });
 
     $task->beforeRun(function ($task, $index, $handlers, $preReturn) {
         print_r("before run ---$preReturn-----$index<br>");

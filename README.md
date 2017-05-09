@@ -14,7 +14,7 @@ Lightweight and powerful task load balancing.
 # Install
 
 ```php
-composer require 'toplan/task-balancer:~0.5'
+composer require toplan/task-balancer:~0.5
 ```
 
 # Usage
@@ -33,7 +33,7 @@ Balancer::task('task1', function($task){
                 $driver->failure();
             }
             //return some data you need
-            return 'some data here';
+            return 'some data you need';
         });
 
     //or like this:
@@ -70,7 +70,7 @@ The `$result` structure:
                 'started_at' => timestamp,
                 'finished_at' => timestamp
             ],
-            'result' => 'some data here'
+            'result' => 'some data you need'
         ],
         ...
     ]
@@ -84,10 +84,11 @@ The `$result` structure:
 ### Balancer::task($name[, $data], Closure $ready);
 
 Create a task instance, and return it.
+The closure `$ready` immediately called with argument `$task`.
 
 ```php
 Balancer::task('taskName', $data, function($task){
-    //task`s ready work, such as create drivers.
+    //task's ready work, such as create drivers.
 });
 ```
 
@@ -101,19 +102,23 @@ The keys of `$options`:
 - `data`
 - `driver`
 
+### $task->name($name)
+
+set the name of task.
+
 ### $task->data($data)
 
 Set the data of task.
 
 ### $task->driver($config[, $weight][, 'backup'], Closure $work)
 
-Create a driver for the task.
+Create a driver for the task. The closure `$work` will been called with arguments `$driver` and `$data`.
 
 > Expected `$weight` to be a integer, default `1`.
 
 ```php
 $task->driver('driverName 80 backup', function($driver, $data){
-    //driver`s work
+    //driver's job content.
 });
 ```
 
@@ -123,7 +128,7 @@ Set the weight value of driver.
 
 ### $driver->backup($is)
 
-Whether the backup driver.
+Set whether backup driver.
 
 > Expected `$is` to be boolean.
 
@@ -133,27 +138,35 @@ Set the data of driver.
 
 > `$data` will store in driver instance.
 
-### $driver->work(Closure $work function($driver, $data){});
+### $driver->work(Closure $work);
 
-Set the work of driver, which will been called with two arguments: `$driver`, `$data`.
+Set the job content of driver.
 
 > `$data` equals to `$driver->getData()`
 
+### $driver->reset($config[, $weight][, 'backup'], Closure $work)
+
+Reset driver's weight value, job content and reset whether backup.
+
+### $driver->destroy()
+
+Remove the driver from task which belongs to.
+
 ### $driver->failure()
 
-Set current driver run failed.
+Set the driver running failure.
 
 ### $driver->success()
 
-Set current driver run succeed.
+Set the driver run successfully.
 
 ### $driver->getDriverData()
 
-Get the data of driver.
+Get the data which store in driver instance.
 
 ### $driver->getTaskData()
 
-Get the data of task.
+Get the data which store in task instance.
 
 
 ## 2. Lifecycle & Hooks
