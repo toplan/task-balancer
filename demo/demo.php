@@ -16,14 +16,14 @@ $data = [
 $t = Balancer::task('test1', $data, function ($task) {
     $task->driver('driver_1 100', 'backup', function ($driver, $data) {
                     $person = new Person($data['name'], $data['age']);
-                    $driver->failed();
+                    $driver->failure();
                     print_r('run work! by '.$driver->name.'<br>');
 
                     return ['test.driver1 working', $person->toString()];
                 });
 
     $task->driver('driver_2', 90, function ($driver, $data) {
-             $driver->failed();
+             $driver->failure();
              print_r('run work! by '.$driver->name.'<br>');
 
              return ['test.driver2 working', $data];
@@ -55,8 +55,6 @@ $result = Balancer::run('test1', $data);
 
 print_r('<br>resuts data:<br>');
 var_dump($result);
-print_r('<hr>task object:<br>');
-var_dump($t);
 
 class Person
 {

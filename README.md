@@ -1,7 +1,8 @@
 # Intro
-lightweight and powerful task load balancing for php
 
-> like the `nginx` load balancing :)
+Lightweight and powerful task load balancing.
+
+> like the `nginx` load balancing :smile:
 
 # Features
 
@@ -13,7 +14,7 @@ lightweight and powerful task load balancing for php
 # Install
 
 ```php
-    composer require 'toplan/task-balancer:~0.4.2'
+composer require 'toplan/task-balancer:~0.5'
 ```
 
 # Usage
@@ -21,33 +22,32 @@ lightweight and powerful task load balancing for php
 ```php
 //define a task
 Balancer::task('task1', function($task){
-
     //define a driver for current task like this:
-    $task->driver('driver_1 100 backup', function($driver, $data){
-                    //do something here
-                    ...
-                    //set whether run success/failure at last
-                    if ($success) {
-                        $driver->success();
-                    } else {
-                        $driver->failure();
-                    }
-                    //return some data you need
-                    return 'some data here';
-                });
+    $task->driver('driver_1 100 backup', function ($driver, $data) {
+            //do something here
+            ...
+            //set whether run success/failure at last
+            if ($success) {
+                $driver->success();
+            } else {
+                $driver->failure();
+            }
+            //return some data you need
+            return 'some data here';
+        });
 
     //or like this:
-    $task->driver('driver_2', 90, function($driver, $data){
-                //...same as above..
-         })->data(['this is data 2']);
+    $task->driver('driver_2', 90, function ($driver, $data) {
+            //...same as above..
+        })->data(['this is data 2']);
 
     //or like this:
     $task->driver('driver_3')
-         ->weight(0)->backUp()
-         ->data(['this is data 3'])
-         ->work(function($driver, $data){
-                    //...same as above..
-                });
+        ->weight(0)->backUp()
+        ->data(['this is data 3'])
+        ->work(function ($driver, $data) {
+            //...same as above..
+        });
 });
 
 //run the task
@@ -81,111 +81,97 @@ The `$result` structure:
 
 ## 1. Create & Run
 
-### Balancer::task($name [, $data], $work);
+### Balancer::task($name[, $data], Closure $ready);
 
-create a task instance, return task instance.
+Create a task instance, and return it.
 
 ```php
 Balancer::task('taskName', $data, function($task){
-    //task`s ready work, like create drivers
+    //task`s ready work, such as create drivers.
 });
 ```
 
-> `$data` will store in task instance.
+> `$data` will store in the task instance.
 
-### Balancer::run($taskName [, array $opts])
+### Balancer::run($name[, array $options])
 
-run the task, and return a result array.
+Run the task by name, and return the result data.
 
-The $opts value:
-* $opts['data']
-* $opts['driver']
+The keys of `$options`:
+- `data`
+- `driver`
 
 ### $task->data($data)
 
-set the data value of task instance, will override origin data.
+Set the data of task.
 
-### $task->driver($optionString [, $weight] [, 'backup'], $work);
+### $task->driver($config[, $weight][, 'backup'], Closure $work)
 
-create a driver instance for `$task`, return driver instance.
+Create a driver for the task.
 
-> `$weight` must be a integer, default value is '1'
+> Expected `$weight` to be a integer, default `1`.
 
 ```php
 $task->driver('driverName 80 backup', function($driver, $data){
     //driver`s work
-    //$driver is driver instance
 });
 ```
 
 ### $driver->weight($weight)
 
-set driver`s weight, return current driver,
-supported chain operation.
-
-> `$weight` must be a integer
+Set the weight value of driver.
 
 ### $driver->backup($is)
 
-set driver is backup, return current driver,
-supported chain operation.
+Whether the backup driver.
 
-> `$is` must be true of false
+> Expected `$is` to be boolean.
 
 ### $driver->data($data);
 
-set the data value of driver instance,
-support chain operation.
+Set the data of driver.
 
 > `$data` will store in driver instance.
 
-### $driver->work(function($driver, $data){});
+### $driver->work(Closure $work function($driver, $data){});
 
-set driver work, give two arguments: `$driver` and `$data`,
-support chain operation.
+Set the work of driver, which will been called with two arguments: `$driver`, `$data`.
 
-> `$data` is a value try to get from driver instance,
-if null will continue try to get from task instance.
->
 > `$data` equals to `$driver->getData()`
 
 ### $driver->failure()
 
-set current driver run failed,
-support chain operation.
+Set current driver run failed.
 
 ### $driver->success()
 
-set current driver run successful.
-support chain operation.
+Set current driver run succeed.
 
 ### $driver->getDriverData()
 
-get data value of driver instance.
+Get the data of driver.
 
 ### $driver->getTaskData()
 
-get data value of task instance.
+Get the data of task.
 
 
-## 2. Task Lifecycle
+## 2. Lifecycle & Hooks
 
-> support multiple handlers for every hook!
+> Support multiple handlers for every hooks!
 
-###Hooks Table
+### Hooks
 
-| Hook name | handler arguments | influence of the last handler`s return value |
+| Hook name | handler arguments | influence of the last handler's return value |
 | --------- | :----------------: | :-----: |
-| beforeCreateDriver | $task, $preReturn, $index, $handlers | no effect |
-| afterCreateDriver | $task, $preReturn, $index, $handlers | no effect |
-| beforeRun | $task, $preReturn, $index, $handlers | if `false` will stop run task and return `false` |
-| beforeDriverRun | $task, $driver, $preReturn, $index, $handlers | if `false` will stop to use current driver and try to use next backup driver |
-| afterDriverRun | $task, $driverResult, $preReturn, $index, $handlers | no effect |
-| afterRun | $task, $taskResult, $preReturn, $index, $handlers | if not boolean will override result value |
+| beforeCreateDriver | $task, $props, $index, &$handlers, $prevReturn | if an array will be merged to original props |
+| afterCreateDriver | $task, $driver, $index, &$handlers, $prevReturn | - |
+| beforeRun | $task, $index, &$handlers, $prevReturn | if `false` will stop run task and return `false` |
+| beforeDriverRun | $task, $driver, $index, &$handlers, $prevReturn | if `false` will stop to use current driver and try to use next backup driver |
+| afterDriverRun | $task, $driverResult, $index, &$handlers, $prevReturn | - |
+| afterRun | $task, $taskResult, $index, &$handlers, $prevReturn | if not boolean will override result value |
 
-###Use Hooks
-
-> `$override` default value is `false`, if `true` will override hook handlers.
+### Usage
 
 * $task->hook($hookName, $handler, $override)
 
@@ -201,39 +187,31 @@ get data value of task instance.
 
 * $task->afterRun($handler, $override)
 
+> `$override` default `false`.
 
 ```php
 //example
-$task->beforeRun(function($task, $preReturn, $index, $handlers){
-    //what is $preReturn?
-    $preReturn == null; //true
+$task->beforeRun(function($task, $index, $handlers, $prevReturn){
+    //what is $prevReturn?
+    echo $prevReturn == null; //true
     //what is $index?
-    $index == 0; //true
+    echo $index == 0; //true
     //what is $handlers?
     echo count($handlers); //2
     //do something..
     return 'beforeRun_1';
 }, false);
 
-$task->beforeRun(function($task, $preReturn, $index, $handlers){
-    //what is $preReturn?
-    $preReturn == 'beforeRun_1'; //true
+$task->beforeRun(function($task, $index, $handlers, $prevReturn){
+    //what is $prevReturn?
+    echo $prevReturn == 'beforeRun_1'; //true
     //what is $index?
-    $index == 1; //true
+    echo $index == 1; //true
     //what is $handlers?
     echo count($handlers); //2
     //do other something..
 }, false);
 ```
-
-# Todo
-
-- [x] remember every task`s start time and end time.
-- [x] remember every driver`s start time and end time.
-- [x] smart parse arguments of method `driver()`.
-- [x] task lifecycle and hooks
-- [ ] hot remove/add a driver.
-- [ ] pause/resume task
 
 # Dependents
 
