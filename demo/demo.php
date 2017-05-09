@@ -55,8 +55,6 @@ $result = Balancer::run('test1', $data);
 
 print_r('<br>resuts data:<br>');
 var_dump($result);
-print_r('<hr>task object:<br>');
-var_dump($t);
 
 class Person
 {

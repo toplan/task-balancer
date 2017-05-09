@@ -10,6 +10,8 @@ require '../src/TaskBalancer/TaskBalancerException.php';
 
 use Toplan\TaskBalance\Balancer;
 
+$data = [];
+
 //define task:
 Balancer::task('task1', $data, function ($task) {
     $task->driver('driver1 10 backup', function ($driver, $data) {
@@ -17,41 +19,41 @@ Balancer::task('task1', $data, function ($task) {
                     print_r('run work! by '.$driver->name.'<br>');
                 });
 
-    $task->beforeRun(function ($task, $preReturn, $index, $handlers) {
+    $task->beforeRun(function ($task, $index, $handlers, $preReturn) {
         print_r("before run ---$preReturn-----$index<br>");
 
         return 11;
     });
 
-    $task->beforeRun(function ($task, $preReturn, $index, $handlers) {
+    $task->beforeRun(function ($task, $index, $handlers, $preReturn) {
         print_r("before run ---$preReturn-----$index<br>");
 
         return 22;
     }, false);
 
-    $task->beforeRun(function ($task, $preReturn, $index, $handlers) {
+    $task->beforeRun(function ($task, $index, $handlers, $preReturn) {
         print_r("before run ---$preReturn-----$index<br>");
     });
 
-    $task->hook('beforeDriverRun', function ($task, $preReturn, $index, $handlers) {
+    $task->hook('beforeDriverRun', function ($task, $driver, $index, $handlers, $preReturn) {
         print_r("before driver run ---$preReturn-----$index<br>");
 
         return [1];
     });
 
-    $task->hook('beforeDriverRun', function ($task, $preReturn, $index, $handlers) {
-        print_r('before driver run ---'.implode(',', $preReturn)."-----$index<br>");
+    $task->hook('beforeDriverRun', function ($task, $driver, $index, $handlers, $preReturn) {
+        print_r('before driver run ---'.implode('=', $preReturn ?: [])."-----$index<br>");
 
         return [1, 2];
     }, true);
 
-    $task->hook('beforeDriverRun', function ($task, $preReturn, $index, $handlers) {
-        print_r('before driver run ---'.implode(',', $preReturn)."-----$index<br>");
+    $task->hook('beforeDriverRun', function ($task, $driver, $index, $handlers, $preReturn) {
+        print_r('before driver run ---'.implode('=', $preReturn)."-----$index<br>");
 
         return [1, 2, 3];
     });
 
-    $task->afterRun(function ($task, $results, $preReturn, $index, $handlers) {
+    $task->afterRun(function ($task, $results, $index, $handlers, $preReturn) {
         print_r('after run --------!<br>');
     });
 });

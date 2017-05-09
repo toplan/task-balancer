@@ -10,19 +10,19 @@ class Driver
     /**
      * driver name.
      *
-     * @var
+     * @var string
      */
     protected $name;
 
     /**
-     * task instance.
+     * the task belongs to.
      *
-     * @var
+     * @var Task
      */
     protected $task;
 
     /**
-     * driver run successful.
+     * success.
      *
      * @var bool
      */
@@ -40,19 +40,19 @@ class Driver
      *
      * @var bool
      */
-    protected $isBackUp = false;
+    protected $backup = false;
 
     /**
      * driver`s work.
      *
-     * @var null
+     * @var \Closure
      */
     protected $work = null;
 
     /**
      * data for run work.
      *
-     * @var null
+     * @var mixed
      */
     protected $data = null;
 
@@ -69,37 +69,45 @@ class Driver
     /**
      * constructor.
      *
-     * @param            $task
-     * @param            $name
-     * @param int        $weight
-     * @param \Closure   $work
-     * @param bool|false $isBackUp
+     * @param Task      $task
+     * @param string    $name
+     * @param int       $weight
+     * @param \Closure  $work
+     * @param bool      $backup
+     *
+     * @throws TaskBalancerException
      */
-    public function __construct(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
+    public function __construct(Task $task, $name, $weight = 1, $backup = false, \Closure $work = null)
     {
+        if (!is_string($name) || !$name) {
+            throw new TaskBalancerException('Expected the driver name to be a non-empty string.');
+        }
+        if ($task->hasDriver($name)) {
+            throw new TaskBalancerException("The driver name `$name` already exits.");
+        }
+        $weight = intval($weight);
+
         $this->task = $task;
         $this->name = $name;
-        $this->weight = intval($weight);
-        $this->isBackUp = (bool) $isBackUp;
+        $this->weight = $weight >= 0 ? $weight : 0;
+        $this->backup = (bool) $backup;
         $this->work = $work;
     }
 
     /**
      * create a driver instance.
      *
-     * @param            $task
-     * @param            $name
-     * @param int        $weight
-     * @param \Closure   $work
-     * @param bool|false $isBackUp
+     * @param Task      $task
+     * @param string    $name
+     * @param int       $weight
+     * @param \Closure  $work
+     * @param bool      $backup
      *
      * @return static
      */
-    public static function create(Task $task, $name, $weight = 1, $isBackUp = false, \Closure $work = null)
+    public static function create(Task $task, $name, $weight = 1, $backup = false, \Closure $work = null)
     {
-        $driver = new self($task, $name, $weight, $isBackUp, $work);
-
-        return $driver;
+        return new self($task, $name, $weight, $backup, $work);
     }
 
     /**
@@ -135,7 +143,7 @@ class Driver
     /**
      * after run driver work.
      *
-     * @param $result
+     * @param mixed $result
      *
      * @return mixed
      */
@@ -147,7 +155,7 @@ class Driver
     }
 
     /**
-     * set driver run success.
+     * set driver run succeed.
      */
     public function success()
     {
@@ -167,7 +175,9 @@ class Driver
     }
 
     /**
-     * @param $data
+     * set data of driver.
+     *
+     * @param mixed $data
      *
      * @return $this
      */
@@ -179,7 +189,9 @@ class Driver
     }
 
     /**
-     * @param $weight
+     * set weight value of driver.
+     *
+     * @param int $weight
      *
      * @return $this
      */
@@ -191,17 +203,22 @@ class Driver
     }
 
     /**
-     * @param bool|true $is
+     * set current driver to be a backup driver.
+     *
+     * @param bool $is
      *
      * @return $this
      */
-    public function backUp($is = true)
+    public function backup($is = true)
     {
-        $this->isBackUp = (bool) $is;
-        if ($is) {
-            $this->task->addToBackupDrivers($this);
+        $is = (bool) $is;
+        if ($this->backup === $is) {
+            return $this;
         }
-        if (!$is) {
+        $this->backup = $is;
+        if ($is) {
+            $this->task->appendToBackupDrivers($this);
+        } else {
             $this->task->removeFromBackupDrivers($this);
         }
 
@@ -209,6 +226,8 @@ class Driver
     }
 
     /**
+     * set the run logic of driver.
+     *
      * @param \Closure $work
      *
      * @return $this
@@ -221,20 +240,39 @@ class Driver
     }
 
     /**
+     * update driver's attributes.
+     */
+    public function update()
+    {
+        $args = func_get_args();
+        extract(self::parseArgs($args));
+        if ($this->weight !== $weight) {
+            $this->weight($weight);
+        }
+        if ($this->backup !== $backup) {
+            $this->backup($backup);
+        }
+        if (is_callable($work) && $this->work !== $work) {
+            $this->work($work);
+        }
+
+        return $this;
+    }
+
+    /**
      * get data.
      *
-     * @return null
+     * @return mixed
      */
     public function getData()
     {
-        return $this->getDriverData() ?:
-               $this->getTaskData();
+        return $this->getDriverData() ?: $this->getTaskData();
     }
 
     /**
      * get driver data.
      *
-     * @return null
+     * @return mixed
      */
     public function getDriverData()
     {
@@ -244,7 +282,7 @@ class Driver
     /**
      * get task data.
      *
-     * @return null
+     * @return mixed
      */
     public function getTaskData()
     {
@@ -252,19 +290,66 @@ class Driver
     }
 
     /**
+     * remove driver from task.
+     */
+    public function destroy()
+    {
+        $this->task->removeDriver($this->name);
+    }
+
+    /**
      * override.
      *
      * @param $name
      *
-     * @return null
+     * @return mixed
      */
     public function __get($name)
     {
-        if ($name == 'data') {
+        if ($name === 'data') {
             return $this->getData();
         }
         if (isset($this->$name)) {
             return $this->$name;
         }
+    }
+
+    /**
+     * parse arguments.
+     *
+     * @param array $args
+     *
+     * @return array
+     */
+    public static function parseArgs(array $args)
+    {
+        $result = [
+            'name'   => null,
+            'work'   => null,
+            'weight' => 1,
+            'backup' => false,
+        ];
+        foreach ($args as $arg) {
+            //find work
+            if (is_callable($arg)) {
+                $result['work'] = $arg;
+            }
+            //find weight, backup, name
+            if (is_string($arg) || is_numeric($arg)) {
+                $arg = preg_replace('/\s+/', ' ', "$arg");
+                $subArgs = explode(' ', trim($arg));
+                foreach ($subArgs as $subArg) {
+                    if (preg_match('/^[0-9]+$/', $subArg)) {
+                        $result['weight'] = intval($subArg);
+                    } elseif (preg_match('/(backup)/', strtolower($subArg))) {
+                        $result['backup'] = true;
+                    } else {
+                        $result['name'] = $subArg;
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 }
