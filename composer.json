@@ -1,9 +1,8 @@
 {
   "name": "toplan/task-balancer",
-  "description": "lightweight and powerful task load balancing for php (like the nginx load balancing)",
+  "description": "lightweight and powerful task load balancing.",
   "license": "MIT",
-  "version": "0.4.2",
-  "keywords": ["task", "balance", "load balancing", "balancer"],
+  "keywords": ["task", "balance", "load balancing"],
   "authors": [
     {
       "name": "toplan",
@@ -17,6 +16,5 @@
     "psr-4": {
       "Toplan\\TaskBalance\\": "src/TaskBalancer/"
     }
-  },
-  "minimum-stability" : "dev"
+  }
 }

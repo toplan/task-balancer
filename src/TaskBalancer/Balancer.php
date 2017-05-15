@@ -10,7 +10,7 @@ class Balancer
     /**
      * task instances.
      *
-     * @var array
+     * @var Task[]
      */
     protected static $tasks = [];
 
@@ -19,19 +19,19 @@ class Balancer
      *
      * @param string        $name
      * @param mixed         $data
-     * @param \Closure|null $callback
+     * @param \Closure|null $ready
      *
-     * @return null|Task
+     * @return Task
      */
-    public static function task($name, $data = null, \Closure $callback = null)
+    public static function task($name, $data = null, \Closure $ready = null)
     {
         $task = self::getTask($name);
         if (!$task) {
             if (is_callable($data)) {
-                $callback = $data;
+                $ready = $data;
                 $data = null;
             }
-            $task = Task::create($name, $data, $callback);
+            $task = Task::create($name, $data, $ready);
             self::$tasks[$name] = $task;
         }
 
@@ -39,7 +39,7 @@ class Balancer
     }
 
     /**
-     * run a task instance.
+     * run task.
      *
      * @param string $name
      * @param array  $opts
@@ -48,28 +48,24 @@ class Balancer
      *
      * @return mixed
      */
-    public static function run($name = '', array $opts = [])
+    public static function run($name, array $opts = [])
     {
         $task = self::getTask($name);
         if (!$task) {
-            throw new TaskBalancerException("run task $name failed, not find this task");
+            throw new TaskBalancerException("Not found task `$name`, please define it.");
         }
         if (isset($opts['data'])) {
             $task->data($opts['data']);
         }
-        $driverName = isset($opts['driver']) ?
-                      $opts['driver'] : (isset($opts['agent']) ?
-                      $opts['agent'] : '');
-        $results = $task->run((string) $driverName);
-        $task->reset();
+        $driverName = isset($opts['driver']) ?: null;
 
-        return $results;
+        return $task->run($driverName);
     }
 
     /**
      * whether has task.
      *
-     * @param $name
+     * @param string $name
      *
      * @return bool
      */
@@ -88,9 +84,9 @@ class Balancer
     /**
      * get a task instance by name.
      *
-     * @param $name
+     * @param string $name
      *
-     * @return null|object
+     * @return Task|null
      */
     public static function getTask($name)
     {
@@ -102,7 +98,7 @@ class Balancer
     /**
      * destroy a task.
      *
-     * @param $name
+     * @param string|string[] $name
      */
     public static function destroy($name)
     {
@@ -111,7 +107,6 @@ class Balancer
                 self::destroy($v);
             }
         } elseif (is_string($name) && self::hasTask($name)) {
-            self::$tasks[$name] = null;
             unset(self::$tasks[$name]);
         }
     }
